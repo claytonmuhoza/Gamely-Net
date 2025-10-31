@@ -1,0 +1,23 @@
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gameplatform-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Strong!Passw0rd"
+      MSSQL_PID: "Developer"   # Version gratuite pour le dev
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    networks:
+      - gameplatform-net
+
+volumes:
+  sql_data:
+
+networks:
+  gameplatform-net:
+    driver: bridge

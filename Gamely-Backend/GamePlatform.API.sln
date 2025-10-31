@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.API", "GamePlatform.API\GamePlatform.API.csproj", "{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Core", "GamePlatform.Core\GamePlatform.Core.csproj", "{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Data", "GamePlatform.Data\GamePlatform.Data.csproj", "{33016E0B-9BE1-4336-8874-C5B57864E58D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+EndGlobal
