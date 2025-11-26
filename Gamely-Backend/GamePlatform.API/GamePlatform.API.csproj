@@ -9,7 +9,14 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7"/>
         <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GamePlatform.Application\GamePlatform.Application.csproj" />
+      <ProjectReference Include="..\GamePlatform.Infrastructure\GamePlatform.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

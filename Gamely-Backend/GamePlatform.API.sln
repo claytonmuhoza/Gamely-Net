@@ -2,9 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.API", "GamePlatform.API\GamePlatform.API.csproj", "{F6307A33-B861-44E3-8BD4-8A7615BB7EE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Core", "GamePlatform.Core\GamePlatform.Core.csproj", "{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Application", "GamePlatform.Application\GamePlatform.Application.csproj", "{5D47EAB1-31D0-450F-98E3-9764AFDE1D0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Data", "GamePlatform.Data\GamePlatform.Data.csproj", "{33016E0B-9BE1-4336-8874-C5B57864E58D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatform.Infrastructure", "GamePlatform.Infrastructure\GamePlatform.Infrastructure.csproj", "{33016E0B-9BE1-4336-8874-C5B57864E58D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamePlatforme.domain", "GamePlatforme.domain\GamePlatforme.domain.csproj", "{ADE58289-A415-48C2-B016-DF49F9536868}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +26,10 @@ Global
 		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33016E0B-9BE1-4336-8874-C5B57864E58D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADE58289-A415-48C2-B016-DF49F9536868}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE58289-A415-48C2-B016-DF49F9536868}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE58289-A415-48C2-B016-DF49F9536868}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE58289-A415-48C2-B016-DF49F9536868}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
