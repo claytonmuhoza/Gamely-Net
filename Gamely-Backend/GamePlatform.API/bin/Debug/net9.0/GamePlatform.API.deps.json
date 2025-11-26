@@ -1144,7 +1144,7 @@
       },
       "GamePlatform.Application/1.0.0": {
         "dependencies": {
-          "GemePlatforme.domain": "1.0.0"
+          "GamePlatforme.domain": "1.0.0"
         },
         "runtime": {
           "GamePlatform.Application.dll": {
@@ -1156,7 +1156,7 @@
       "GamePlatform.Infrastructure/1.0.0": {
         "dependencies": {
           "GamePlatform.Application": "1.0.0",
-          "GemePlatforme.domain": "1.0.0",
+          "GamePlatforme.domain": "1.0.0",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.10"
         },
         "runtime": {
@@ -1166,12 +1166,12 @@
           }
         }
       },
-      "GemePlatforme.domain/1.0.0": {
+      "GamePlatforme.domain/1.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Hosting": "9.0.7"
         },
         "runtime": {
-          "GemePlatforme.domain.dll": {
+          "GamePlatforme.domain.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -1979,7 +1979,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "GemePlatforme.domain/1.0.0": {
+    "GamePlatforme.domain/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

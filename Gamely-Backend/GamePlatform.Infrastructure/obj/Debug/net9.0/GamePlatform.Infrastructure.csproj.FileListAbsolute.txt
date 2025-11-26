@@ -1,14 +1,9 @@
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GemePlatforme.domain.deps.json
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GemePlatforme.domain.runtimeconfig.json
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/appsettings.Development.json
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/appsettings.json
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GemePlatforme.domain
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Infrastructure.deps.json
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Infrastructure.runtimeconfig.json
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Infrastructure.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Infrastructure.pdb
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GemePlatforme.domain.dll
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GemePlatforme.domain.pdb
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/obj/Debug/net9.0/GamePlatform.Infrastructure.csproj.AssemblyReference.cache
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/obj/Debug/net9.0/GamePlatform.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/obj/Debug/net9.0/GamePlatform.Infrastructure.AssemblyInfoInputs.cache
@@ -23,3 +18,8 @@
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/obj/Debug/net9.0/ref/GamePlatform.Infrastructure.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Application.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatform.Application.pdb
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatforme.domain.deps.json
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatforme.domain.runtimeconfig.json
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatforme.domain
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatforme.domain.dll
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.Infrastructure/bin/Debug/net9.0/GamePlatforme.domain.pdb

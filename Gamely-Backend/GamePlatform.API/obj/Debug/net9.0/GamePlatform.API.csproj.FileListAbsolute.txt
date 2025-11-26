@@ -36,9 +36,6 @@
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/obj/Debug/net9.0/GamePlatform.API.pdb
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/obj/Debug/net9.0/GamePlatform.API.genruntimeconfig.cache
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/obj/Debug/net9.0/ref/GamePlatform.API.dll
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GemePlatforme.domain.deps.json
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GemePlatforme.domain.runtimeconfig.json
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GemePlatforme.domain
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Microsoft.Extensions.Configuration.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Microsoft.Extensions.Configuration.Binder.dll
@@ -70,9 +67,7 @@
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/runtimes/win/lib/net9.0/System.Diagnostics.EventLog.Messages.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/runtimes/win/lib/net9.0/System.Diagnostics.EventLog.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatform.Application.dll
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GemePlatforme.domain.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatform.Application.pdb
-/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GemePlatforme.domain.pdb
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Azure.Core.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Azure.Identity.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/Microsoft.Bcl.AsyncInterfaces.dll
@@ -119,3 +114,8 @@
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatform.Infrastructure.dll
 /home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatform.Infrastructure.pdb
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatforme.domain.deps.json
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatforme.domain.runtimeconfig.json
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatforme.domain
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatforme.domain.dll
+/home/clayton/Documents/projet_dot_net/Gamely-Net/Gamely-Backend/GamePlatform.API/bin/Debug/net9.0/GamePlatforme.domain.pdb

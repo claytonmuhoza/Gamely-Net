@@ -6,12 +6,12 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "GemePlatforme.domain/1.0.0": {
+      "GamePlatforme.domain/1.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Hosting": "9.0.7"
         },
         "runtime": {
-          "GemePlatforme.domain.dll": {}
+          "GamePlatforme.domain.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration/9.0.7": {
@@ -398,7 +398,7 @@
     }
   },
   "libraries": {
-    "GemePlatforme.domain/1.0.0": {
+    "GamePlatforme.domain/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
