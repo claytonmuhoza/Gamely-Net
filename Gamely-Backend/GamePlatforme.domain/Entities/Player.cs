@@ -7,11 +7,10 @@ public class Player
 
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
-    protected Player() { } // EF Core
+    protected Player() { } 
 
     public Player(string pseudo)
     {
-       
         Pseudo = pseudo.Trim();
     }
 }

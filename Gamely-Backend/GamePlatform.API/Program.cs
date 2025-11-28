@@ -1,3 +1,4 @@
+using GamePlatform.API.Hubs;
 using GamePlatform.API.Middlewares;
 using GamePlatform.Application.Lobbies;
 using GamePlatform.Application.Players;
@@ -21,14 +22,14 @@ builder.Services.AddScoped<ILobbyRepository, LobbyRepository>();
 //Application Services
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ILobbyService, LobbyService>();
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.MapControllers();
-// Configure the HTTP request pipeline.
-
+app.MapHub<LobbyHub>("hubs/lobby");
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

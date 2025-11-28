@@ -15,7 +15,7 @@ public class Lobby {
     public List<Guid> PlayerIds { get; private set; } = new();
 
     public bool HasStarted { get; private set; }
-
+    public int? MaxPlayer { get;  set; }
     protected Lobby() { }
 
     public Lobby(Guid hostPlayerId, GameType gameType, bool isPrivate, string? password, string code)

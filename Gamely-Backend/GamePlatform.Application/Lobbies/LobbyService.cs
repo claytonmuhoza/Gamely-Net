@@ -1,3 +1,4 @@
+using GamePlatform.Application.Exceptions;
 using GamePlatform.Application.Players;
 using GamePlatforme.domain.Entities;
 
@@ -16,9 +17,15 @@ public class LobbyService : ILobbyService
 
     public async Task<LobbyDto> CreateLobbyAsync(CreateLobbyCommand command, CancellationToken cancellationToken = default)
     {
-        var host = await _playerService.GetByIdAsync(command.HostPlayerId, cancellationToken)
-                   ?? throw new InvalidOperationException("Host player not found");
+        if (command.HostPlayerId == Guid.Empty)
+        {
+            throw new ApplicationValidationException(
+                "Host player id is required", "LOBBY_HOST_PLAYER_REQUIRED");
+        }
 
+        var host = await _playerService.GetByIdAsync(command.HostPlayerId, cancellationToken);
+        if(host == null) throw new ApplicationValidationException("Host player not found", "LOBBY_HOST_PLAYER_NOT_FOUND");
+        if(command.IsPrivate && string.IsNullOrWhiteSpace(command.Password)) throw new ApplicationValidationException("Password is required", "LOBBY_PASSWORD_REQUIRED");
         var code = GenerateCode();
 
         var lobby = new Lobby(host.Id, command.GameType, command.IsPrivate, command.Password, code);
@@ -29,12 +36,20 @@ public class LobbyService : ILobbyService
 
     public async Task<LobbyDto> JoinLobbyAsync(JoinLobbyCommand command, CancellationToken cancellationToken = default)
     {
-        var lobby = await _lobbyRepository.GetByIdAsync(command.LobbyId, cancellationToken)
-                    ?? throw new InvalidOperationException("Lobby not found");
+        if (command.LobbyId == Guid.Empty)
+        {
+            throw new ApplicationValidationException(
+                "Lobby id is required", "LOBBY_ID_REQUIRED");
+        }
 
+        var lobby = await _lobbyRepository.GetByIdAsync(command.LobbyId, cancellationToken) ??
+                    throw new ApplicationValidationException("Lobby not found", "LOBBY_NOT_FOUND");
+        if(command.PlayerId == Guid.Empty) throw new ApplicationValidationException("Player id is required", "PLAYER_ID_REQUIRED");
         var player = await _playerService.GetByIdAsync(command.PlayerId, cancellationToken)
-                    ?? throw new InvalidOperationException("Player not found");
-
+                     ?? throw new ApplicationValidationException(
+                         "Player not found",
+                         "PLAYER_NOT_FOUND"
+                     );
         if (!lobby.CheckPassword(command.Password))
             throw new UnauthorizedAccessException("Invalid password");
 
