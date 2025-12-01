@@ -11,7 +11,7 @@ public class GamePlatformDbContext: DbContext
 
     public DbSet<Player> Players => Set<Player>();
     public DbSet<Lobby> Lobbies => Set<Lobby>();
-
+    public DbSet<MorpionGame> MorpionGames => Set<MorpionGame>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

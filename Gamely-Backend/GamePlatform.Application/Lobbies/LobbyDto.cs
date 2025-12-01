@@ -12,4 +12,6 @@ public class LobbyDto
     public bool HasStarted { get; set; }
     public Guid HostPlayerId { get; set; }
     public List<Guid> PlayerIds { get; set; } = new();
+    public int MinPlayers { get; set; }
+    public int MaxPlayers { get; set; }
 }

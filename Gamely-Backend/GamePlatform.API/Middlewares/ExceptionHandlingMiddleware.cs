@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using GamePlatform.Application.Exceptions;
 
 namespace GamePlatform.API.Middlewares;
 
@@ -21,9 +20,9 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
-        catch (ApplicationValidationException exception)
+        catch (ArgumentException ex)
         {
-            _logger.LogWarning(exception, "Application validation error");
+            _logger.LogWarning(ex, "Argument error");
 
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             context.Response.ContentType = "application/json";
@@ -31,10 +30,27 @@ public class ExceptionHandlingMiddleware
             var body = new
             {
                 type = "https://httpstatuses.com/400",
-                title = "Validation error",
+                title = "Invalid argument",
                 status = 400,
-                detail = exception.Message,
-                errorCode = exception.ErrorCode
+                detail = ex.Message,
+                parameter = ex.ParamName
+            };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(body));
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation");
+
+            context.Response.StatusCode = (int)HttpStatusCode.Conflict; 
+            context.Response.ContentType = "application/json";
+
+            var body = new
+            {
+                type = "https://httpstatuses.com/409",
+                title = "Invalid operation",
+                status = 409,
+                detail = ex.Message
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(body));

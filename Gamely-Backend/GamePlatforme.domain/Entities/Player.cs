@@ -7,7 +7,10 @@ public class Player
 
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
-    protected Player() { } 
+    protected Player()
+    {
+        Pseudo = string.Empty;
+    } 
 
     public Player(string pseudo)
     {
