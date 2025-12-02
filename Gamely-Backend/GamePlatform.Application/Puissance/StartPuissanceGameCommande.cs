@@ -1,6 +1,6 @@
 ﻿namespace GamePlatform.Application.Puissance;
 
-public class startPuissanceGameCommande
+public class StartPuissanceGameCommande
 {
     public Guid LobbyId { get; set; }
 }
