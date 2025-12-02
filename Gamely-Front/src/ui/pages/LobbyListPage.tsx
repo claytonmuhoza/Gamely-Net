@@ -53,7 +53,7 @@ export function LobbyListPage() {
       setCreating(true);
       await useCases.lobby.create.execute({
         hostPlayerId: player.id,
-        gameType: GameType.Morpion,
+        gameType: GameType.SpeedTyping,
         isPrivate: false,
       });
       const data = await useCases.lobby.listOpen.execute();

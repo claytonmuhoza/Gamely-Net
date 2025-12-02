@@ -1,3 +1,4 @@
+using GamePlatform.Application.Interfaces.Players;
 using GamePlatform.Application.Players;
 using Microsoft.AspNetCore.Mvc;
 

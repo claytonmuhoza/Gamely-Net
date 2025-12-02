@@ -1,3 +1,4 @@
+using GamePlatform.Application.Interfaces.Repositories;
 using GamePlatform.Application.Lobbies;
 using GamePlatform.Infrastructure.Persistence;
 using GamePlatforme.domain.Entities;

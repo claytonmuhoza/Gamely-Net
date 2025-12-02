@@ -4,6 +4,7 @@ import { MorpionGamePage } from "../ui/pages/MorpionGamePage";
 import GamelyHomePage from "../ui/pages/GamelyHomePage.tsx";
 import GamesListPage from "../ui/pages/GamesListPage.tsx";
 import Layout from "../ui/components/layout.tsx";
+import {SpeedTypingGamePage} from "../ui/pages/SpeedTypingGamePage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -13,7 +14,8 @@ export const router = createBrowserRouter([
             { path: "", element: <GamelyHomePage /> },
             { path: "jeux", element: <GamesListPage /> },
             { path: "lobbies", element: <LobbyListPage /> },
-            { path: "morpion/:gameId", element: <MorpionGamePage /> }
+            { path: "morpion/:gameId", element: <MorpionGamePage /> },
+            {path: '/games/speedtyping/:lobbyId',  element: <SpeedTypingGamePage />}
         ]
     }
 ]);
