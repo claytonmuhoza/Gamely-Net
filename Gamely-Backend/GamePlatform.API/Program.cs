@@ -3,6 +3,7 @@ using GamePlatform.API.Middlewares;
 using GamePlatform.Application.Lobbies;
 using GamePlatform.Application.Morpion;
 using GamePlatform.Application.Players;
+using GamePlatform.Application.Puissance;
 using GamePlatform.Infrastructure.Persistence;
 using GamePlatform.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ builder.Services.AddDbContext<GamePlatformDbContext>(options =>
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<ILobbyRepository, LobbyRepository>();
 builder.Services.AddScoped<IMorpionGameRepository, MorpionGameRepository>();
+builder.Services.AddScoped<IPuissanceGameRepository,PuissanceGameRepository>();
 
 // Application Services
 builder.Services.AddScoped<IPlayerService, PlayerService>();
