@@ -15,8 +15,11 @@ public class GamePlatformDbContext: DbContext
     public DbSet<MorpionGame> MorpionGames => Set<MorpionGame>();
     public DbSet<SpeedTypingGame> SpeedTypingGames => Set<SpeedTypingGame>();
     public DbSet<TypingText> TypingTexts => Set<TypingText>();
+    public DbSet<PuissanceGame> PuissanceGames => Set<PuissanceGame>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        // Configs Fluent API si besoin
     }
 }
