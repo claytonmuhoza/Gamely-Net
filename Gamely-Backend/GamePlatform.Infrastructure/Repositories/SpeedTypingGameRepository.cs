@@ -14,12 +14,17 @@ public class SpeedTypingGameRepository : ISpeedTypingGameRepository
         _context = context;
     }
 
+    public async Task<SpeedTypingGame> AddAsync(SpeedTypingGame game, CancellationToken cancellationToken = default)
+    {
+        _context.SpeedTypingGames.Add(game);
+        await _context.SaveChangesAsync(cancellationToken);
+        return game;
+    }
+
     public async Task<SpeedTypingGame?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.SpeedTypingGames
             .Include(g => g.Text)
-            .Include(g => g.PlayerProgresses)
-            .Include(g => g.Results)
             .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
     }
 
@@ -27,64 +32,12 @@ public class SpeedTypingGameRepository : ISpeedTypingGameRepository
     {
         return await _context.SpeedTypingGames
             .Include(g => g.Text)
-            .Include(g => g.PlayerProgresses)
-            .Include(g => g.Results)
             .FirstOrDefaultAsync(g => g.LobbyId == lobbyId, cancellationToken);
-    }
-
-    public async Task<List<SpeedTypingGame>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.SpeedTypingGames
-            .Include(g => g.Text)
-            .Include(g => g.PlayerProgresses)
-            .Include(g => g.Results)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<List<SpeedTypingGame>> GetByPlayerIdAsync(Guid playerId, CancellationToken cancellationToken = default)
-    {
-        return await _context.SpeedTypingGames
-            .Include(g => g.Text)
-            .Include(g => g.PlayerProgresses)
-            .Include(g => g.Results)
-            .Where(g => g.PlayerProgresses.Any(p => p.PlayerId == playerId))
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<List<SpeedTypingGame>> GetInProgressGamesAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.SpeedTypingGames
-            .Include(g => g.Text)
-            .Include(g => g.PlayerProgresses)
-            .Include(g => g.Results)
-            .Where(g => g.Status == SpeedTypingStatus.InProgress)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task AddAsync(SpeedTypingGame game, CancellationToken cancellationToken = default)
-    {
-        await _context.SpeedTypingGames.AddAsync(game, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(SpeedTypingGame game, CancellationToken cancellationToken = default)
     {
         _context.SpeedTypingGames.Update(game);
         await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var game = await _context.SpeedTypingGames.FindAsync(new object[] { id }, cancellationToken);
-        if (game != null)
-        {
-            _context.SpeedTypingGames.Remove(game);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-    }
-
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _context.SpeedTypingGames.AnyAsync(g => g.Id == id, cancellationToken);
     }
 }

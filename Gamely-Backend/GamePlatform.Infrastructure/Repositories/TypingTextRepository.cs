@@ -33,13 +33,6 @@ public class TypingTextRepository : ITypingTextRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<TypingText>> GetByLanguageAsync(string language, CancellationToken cancellationToken = default)
-    {
-        return await _context.TypingTexts
-            .Where(t => t.Language == language)
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<TypingText?> GetRandomByDifficultyAsync(TextDifficulty difficulty, string language = "fr", CancellationToken cancellationToken = default)
     {
         var texts = await _context.TypingTexts
@@ -56,21 +49,5 @@ public class TypingTextRepository : ITypingTextRepository
     {
         await _context.TypingTexts.AddAsync(text, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task UpdateAsync(TypingText text, CancellationToken cancellationToken = default)
-    {
-        _context.TypingTexts.Update(text);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var text = await _context.TypingTexts.FindAsync(new object[] { id }, cancellationToken);
-        if (text != null)
-        {
-            _context.TypingTexts.Remove(text);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
     }
 }

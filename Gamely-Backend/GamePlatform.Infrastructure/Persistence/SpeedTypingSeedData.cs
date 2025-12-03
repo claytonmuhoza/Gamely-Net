@@ -12,7 +12,7 @@ public static class SpeedTypingSeedData
 
         var texts = new List<TypingText>
         {
-            // Easy texts
+            // Easy texts (5)
             new TypingText(
                 "Le chat dort paisiblement sur le canapé pendant que son maître lit un livre.",
                 TextDifficulty.Easy,
@@ -39,7 +39,7 @@ public static class SpeedTypingSeedData
                 "fr"
             ),
 
-            // Medium texts
+            // Medium texts (5)
             new TypingText(
                 "La programmation informatique nécessite rigueur, logique et créativité pour résoudre des problèmes complexes de manière élégante et efficace.",
                 TextDifficulty.Medium,
@@ -66,7 +66,7 @@ public static class SpeedTypingSeedData
                 "fr"
             ),
 
-            // Hard texts
+            // Hard texts (5)
             new TypingText(
                 "L'implémentation d'un système distribué résilient nécessite une compréhension approfondie des patterns de synchronisation, de la gestion des transactions distribuées et des mécanismes de cohérence éventuelle.",
                 TextDifficulty.Hard,
@@ -83,12 +83,12 @@ public static class SpeedTypingSeedData
                 "fr"
             ),
             new TypingText(
-                "L'optimisation des requêtes SQL complexes implique l'analyse des plans d'exécution, la création d'index appropriés et la compréhension des statistiques du moteur de base de données.",
+                "L'optimisation des requêtes SQL complexes implique l'analyse des plans d'exécution, la création d'index appropriés et la compréhension des statistiques du moteur de base de données pour améliorer les performances.",
                 TextDifficulty.Hard,
                 "fr"
             ),
             new TypingText(
-                "La gestion de la concurrence en programmation asynchrone requiert une maîtrise des concepts de threads, de tasks, de synchronization contexts et des patterns async-await pour éviter les deadlocks.",
+                "La gestion de la concurrence en programmation asynchrone requiert une maîtrise des concepts de threads, de tasks, de synchronization contexts et des patterns async-await pour éviter les deadlocks et race conditions.",
                 TextDifficulty.Hard,
                 "fr"
             )

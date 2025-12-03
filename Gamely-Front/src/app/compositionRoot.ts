@@ -10,14 +10,13 @@ import { PlayMorpionMoveUseCase } from "../application/morpion/usecases/playMorp
 import { MorpionHttpRepository } from "../infrastructure/http/morpion/MorpionHttpRepository";
 import { JoinLobbyUseCase } from "../application/lobby/usecases/joinLobby.usecase";
 import {SpeedTypingHttpRepository} from "../infrastructure/http/speedtyping/SpeedTypingHttpRepository.ts";
-import {SpeedTypingSignalRClient} from "../infrastructure/realtime/speedtyping/SpeedTypingSignalRClient.ts";
-import {SpeedTypingRepositoryImpl} from "../infrastructure/implementation/SpeedTypingRepositoryImpl.ts";
+import {StartSpeedTypingGameUseCase} from "../application/speedtyping/usecases/startSpeedTypingGame.usecase.ts";
+import {GetSpeedTypingGameUseCase} from "../application/speedtyping/usecases/getSpeedTypingGame.usecase.ts";
 // Repositories
 const playerRepository = new PlayerHttpRepository();
 const lobbyRepository = new LobbyHttpRepository();
 const morpionRepository = new MorpionHttpRepository();
-const speedTypingHttpRepository = new SpeedTypingHttpRepository();
-const speedTypingSignalRClient = new SpeedTypingSignalRClient();
+const speedtypingRepository = new SpeedTypingHttpRepository();
 // Use cases
 export const useCases = {
   player: {
@@ -33,11 +32,10 @@ export const useCases = {
     get: new GetMorpionGameUseCase(morpionRepository),
     playMove: new PlayMorpionMoveUseCase(morpionRepository),
   },
+    speedtyping: {
+        start: new StartSpeedTypingGameUseCase(speedtypingRepository),
+        get: new GetSpeedTypingGameUseCase(speedtypingRepository),
+    }
 };
 
-
-export const speedTypingRepository = new SpeedTypingRepositoryImpl(
-    speedTypingHttpRepository,
-    speedTypingSignalRClient
-);
 

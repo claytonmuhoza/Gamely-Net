@@ -1,5 +1,5 @@
-using GamePlatform.Application.Interfaces.Players;
 using GamePlatform.Application.Interfaces.Repositories;
+using GamePlatform.Application.Interfaces.Services;
 using GamePlatforme.domain.Entities;
 namespace GamePlatform.Application.Players;
 

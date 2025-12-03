@@ -1,118 +1,86 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Button, Paper, CircularProgress, Alert } from '@mui/material';
-import { SpeedTypingBoard } from '../components/speedtyping/SpeedTypingBoard';
-import { PlayerProgressList } from '../components/speedtyping/PlayerProgressList';
-import { GameResults } from '../components/speedtyping/GameResults';
-import {
-    SpeedTypingStatus,
-    TextDifficulty,
-    type PlayerProgress,
-    type PlayerResult,
-    type SpeedTypingGame
-} from '../../domain/speedtyping/speedtyping';
-import {speedTypingRepository} from "../../app/compositionRoot.ts";
-import {useCurrentPlayer} from "../../app/hook/useCurrentPlayer.ts";
+import { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Stack, Typography, Button, CircularProgress, Alert, Paper, Box } from "@mui/material";
+import { useCases } from "../../app/compositionRoot";
+import type { SpeedTypingGame } from "../../domain/speedtyping/speedtyping";
+import { SpeedTypingBoard } from "../components/speedtyping/SpeedTypingBoard";
+import { PlayerProgressList } from "../components/speedtyping/PlayerProgressList";
+import { GameResults } from "../components/speedtyping/GameResults";
+import { useCurrentPlayer } from "../../app/hook/useCurrentPlayer";
+import { SpeedTypingSignalRClient } from "../../infrastructure/realtime/speedtyping/SpeedTypingSignalRClient";
+import { SpeedTypingStatus } from "../../domain/speedtyping/speedtyping";
 
-
-export const SpeedTypingGamePage: React.FC= () => {
-    const { lobbyId } = useParams<{ lobbyId: string }>();
+export function SpeedTypingGamePage() {
+    const { gameId } = useParams<{ gameId: string }>();
     const { player } = useCurrentPlayer();
-    const currentPlayerId = player?.id!;
     const navigate = useNavigate();
-    const repository = speedTypingRepository;
+
     const [game, setGame] = useState<SpeedTypingGame | null>(null);
-    const [timeRemaining, setTimeRemaining] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isHost, setIsHost] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState(0);
+    const signalRClientRef = useRef<SpeedTypingSignalRClient | null>(null);
 
-    // Initialize game
+    // Charger l'état initial via REST
     useEffect(() => {
-        const initGame = async () => {
-            if (!lobbyId) return;
+        if (!gameId || !player) return;
 
+        const load = async () => {
             try {
                 setLoading(true);
-
-                // Get or create game
-                let existingGame = await repository.getGameByLobbyId(lobbyId);
-
-                if (!existingGame) {
-                    // Create new game (à adapter selon votre logique de création)
-                    const createDto = {
-                        lobbyId,
-                        textDifficulty: TextDifficulty.Medium,
-                        playerIds: [currentPlayerId], // À compléter avec les joueurs du lobby
-                        durationSeconds: 60
-                    };
-                    existingGame = await repository.createGame(createDto);
-                }
-
-                setGame(existingGame);
-                setTimeRemaining(existingGame.durationSeconds);
-
-                // Join SignalR
-                await repository.joinGame(existingGame.id);
-
-                // Setup listeners
-                setupSignalRListeners();
-
-            } catch (err: any) {
-                setError(err.message || 'Erreur lors du chargement du jeu');
+                const g = await useCases.speedtyping.get.execute(gameId);
+                setGame(g);
+                setTimeRemaining(g.getTimeRemaining());
+            } catch (err) {
+                setError("Erreur lors du chargement de la partie");
+                console.log(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        initGame();
+        load();
+    }, [gameId, player]);
+
+    // Connexion SignalR + join du hub
+    useEffect(() => {
+        if (!gameId || !player) return;
+
+        const client = new SpeedTypingSignalRClient();
+        signalRClientRef.current = client;
+
+        client.onGameUpdated((updatedGame) => {
+            console.log("[SpeedTypingGamePage] Game mis à jour via SignalR", updatedGame);
+            setGame(updatedGame);
+            setTimeRemaining(updatedGame.getTimeRemaining());
+        });
+
+        client.onError((err) => {
+            console.log("SpeedTypingHub error", err);
+            setError(typeof err === "string" ? err : err?.message ?? "Erreur temps réel");
+        });
+
+        (async () => {
+            try {
+                await client.joinGame(gameId, player.id);
+            } catch (err) {
+                console.log("joinGame error", err);
+                setError("Erreur lors de la connexion temps réel");
+            }
+        })();
 
         return () => {
-            if (game) {
-                repository.leaveGame(game.id);
-            }
+            client.stop().catch(() => {});
+            signalRClientRef.current = null;
         };
-    }, [lobbyId]);
-
-    const setupSignalRListeners = useCallback(() => {
-        repository.onGameStarted((data) => {
-            setGame(prev => prev ? { ...prev, status: SpeedTypingStatus.InProgress, startedAt: data.startedAt } : null);
-            setTimeRemaining(data.durationSeconds);
-        });
-
-        repository.onPlayerProgressUpdated((progress: PlayerProgress) => {
-            setGame(prev => {
-                if (!prev) return null;
-                const updatedProgresses = prev.playerProgresses.map(p =>
-                    p.playerId === progress.playerId ? progress : p
-                );
-                return { ...prev, playerProgresses: updatedProgresses };
-            });
-        });
-
-        repository.onPlayerFinished((data) => {
-            console.log('Player finished:', data);
-        });
-
-        repository.onGameResults((results: PlayerResult[]) => {
-            setGame(prev => prev ? { ...prev, status: SpeedTypingStatus.Finished, results } : null);
-        });
-
-        repository.onTimeUp((data) => {
-            setGame(prev => prev ? { ...prev, status: SpeedTypingStatus.Finished, results: data.results } : null);
-        });
-
-        repository.onError((error) => {
-            setError(error.message);
-        });
-    }, [repository]);
+    }, [gameId, player]);
 
     // Timer
     useEffect(() => {
-        if (game?.status !== SpeedTypingStatus.InProgress) return;
+        if (!game || game.status !== SpeedTypingStatus.InProgress) return;
 
         const interval = setInterval(() => {
-            setTimeRemaining(prev => {
+            setTimeRemaining((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
                     return 0;
@@ -125,131 +93,121 @@ export const SpeedTypingGamePage: React.FC= () => {
     }, [game?.status]);
 
     const handleStartGame = async () => {
-        if (!game) return;
+        if (!gameId) return;
+        const client = signalRClientRef.current;
+        if (!client) return;
+
         try {
-            await repository.startGame(game.id);
-        } catch (err: any) {
-            setError(err.message);
+            await client.startGame(gameId);
+        } catch (err) {
+            console.log("startGame error", err);
+            setError("Erreur lors du démarrage");
         }
     };
 
     const handleTextChange = async (text: string) => {
-        if (!game || game.status !== SpeedTypingStatus.InProgress) return;
+        if (!gameId || !player || !game || !game.isInProgress) return;
+        const client = signalRClientRef.current;
+        if (!client) return;
 
         try {
-            await repository.updateProgress(game.id, currentPlayerId, text);
-        } catch (err: any) {
-            console.error('Error updating progress:', err);
+            await client.updateProgress(gameId, player.id, text);
+        } catch (err) {
+            console.log("updateProgress error", err);
         }
     };
 
-    const handlePlayAgain = () => {
-        navigate(`/lobby/${lobbyId}`);
-    };
-
-    const handleBackToLobby = () => {
-        navigate(`/lobby/${lobbyId}`);
-    };
-
-    if (loading) {
+    if (!player) {
         return (
-            <Container className="flex items-center justify-center min-h-screen">
+            <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0a0a0a", padding: "16px" }}>
+                <Alert severity="warning">Veuillez d&apos;abord choisir un pseudo.</Alert>
+            </div>
+        );
+    }
+
+    if (loading || !game) {
+        return (
+            <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#0a0a0a", gap: "16px" }}>
                 <CircularProgress size={60} />
-            </Container>
+                <Typography variant="h6" color="text.secondary">Chargement de la partie...</Typography>
+            </div>
         );
     }
 
-    if (error) {
-        return (
-            <Container className="py-8">
-                <Alert severity="error" onClose={() => setError(null)}>
-                    {error}
-                </Alert>
-            </Container>
-        );
-    }
-
-    if (!game) {
-        return (
-            <Container className="py-8">
-                <Alert severity="warning">Jeu introuvable</Alert>
-            </Container>
-        );
-    }
-
-    const currentProgress = game.playerProgresses.find(p => p.playerId === currentPlayerId);
+    const currentProgress = game.getPlayerProgress(player.id);
+    const isHost = game.lobbyId; // À adapter selon votre logique
 
     return (
-        <Container maxWidth="xl" className="py-8">
-            <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Game Area */}
-                <Box className="lg:col-span-2 space-y-6">
-                    <Paper className="p-6">
-                        <Typography variant="h4" className="mb-6 font-bold text-center">
-                            ⌨️ Speed Typing
-                        </Typography>
-
-                        {game.status === SpeedTypingStatus.WaitingToStart && (
-                            <Box className="text-center space-y-4">
-                                <Typography variant="h6">En attente du démarrage...</Typography>
-                                {isHost && (
-                                    <Button
-                                        variant="contained"
-                                        size="large"
-                                        onClick={handleStartGame}
-                                        color="primary"
-                                    >
-                                        Démarrer la partie
-                                    </Button>
-                                )}
-                            </Box>
+        <div style={{ minHeight: "100vh", backgroundColor: "#0a0a0a", padding: "32px 16px" }}>
+            <Box sx={{ maxWidth: "1400px", margin: "0 auto" }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" }, gap: 3 }}>
+                    {/* Main Game Area */}
+                    <Stack spacing={3}>
+                        {error && (
+                            <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
                         )}
 
-                        {game.status === SpeedTypingStatus.InProgress && currentProgress && (
-                            <SpeedTypingBoard
-                                text={game.text}
-                                currentProgress={currentProgress}
-                                onTextChange={handleTextChange}
-                                isGameStarted={true}
-                                timeRemaining={timeRemaining}
-                                totalTime={game.durationSeconds}
-                            />
-                        )}
-
-                        {game.status === SpeedTypingStatus.Finished && (
-                            <GameResults
-                                results={game.results}
-                                onPlayAgain={handlePlayAgain}
-                                onBackToLobby={handleBackToLobby}
-                            />
-                        )}
-                    </Paper>
-                </Box>
-
-                {/* Players Sidebar */}
-                <Box className="space-y-4">
-                    <Paper className="p-4">
-                        <Typography variant="h6" className="mb-4 font-bold">
-                            Joueurs ({game.playerProgresses.length})
-                        </Typography>
-                        <PlayerProgressList
-                            progresses={game.playerProgresses}
-                            currentPlayerId={currentPlayerId}
-                        />
-                    </Paper>
-
-                    {game.status === SpeedTypingStatus.InProgress && (
-                        <Paper className="p-4 bg-blue-50">
-                            <Typography variant="h6" className="text-center font-bold text-blue-800">
-                                ⏱️ {timeRemaining}s
+                        <Paper sx={{ p: 4, backgroundColor: "#121212" }}>
+                            <Typography variant="h4" textAlign="center" fontWeight="bold" mb={4}>
+                                ⌨️ Speed Typing
                             </Typography>
-                            <Typography variant="body2" className="text-center text-blue-600">
-                                Temps restant
-                            </Typography>
+
+                            {game.isWaiting && (
+                                <Stack spacing={3} alignItems="center">
+                                    <Typography variant="h6">En attente du démarrage...</Typography>
+                                    {isHost && (
+                                        <Button variant="contained" size="large" onClick={handleStartGame}>
+                                            Démarrer la partie
+                                        </Button>
+                                    )}
+                                </Stack>
+                            )}
+
+                            {game.isInProgress && currentProgress && (
+                                <SpeedTypingBoard
+                                    text={game.text}
+                                    currentProgress={currentProgress}
+                                    onTextChange={handleTextChange}
+                                    isGameStarted={true}
+                                    timeRemaining={timeRemaining}
+                                    totalTime={game.durationSeconds}
+                                />
+                            )}
+
+                            {game.isFinished && (
+                                <GameResults
+                                    results={game.results}
+                                    onBackToLobby={() => navigate(`/lobbies`)}
+                                />
+                            )}
                         </Paper>
-                    )}
+                    </Stack>
+
+                    {/* Players Sidebar */}
+                    <Stack spacing={3}>
+                        <Paper sx={{ p: 3, backgroundColor: "#121212" }}>
+                            <Typography variant="h6" mb={2} fontWeight="bold">
+                                👥 Joueurs ({game.playerProgresses.length})
+                            </Typography>
+                            <PlayerProgressList
+                                progresses={game.playerProgresses}
+                                currentPlayerId={player.id}
+                            />
+                        </Paper>
+
+                        {game.isInProgress && (
+                            <Paper sx={{ p: 3, backgroundColor: "#1e3a5f", textAlign: "center" }}>
+                                <Typography variant="h3" fontWeight="bold" color="primary">
+                                    ⏱️ {timeRemaining}s
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Temps restant
+                                </Typography>
+                            </Paper>
+                        )}
+                    </Stack>
                 </Box>
             </Box>
-        </Container>
+        </div>
     );
-};
+}

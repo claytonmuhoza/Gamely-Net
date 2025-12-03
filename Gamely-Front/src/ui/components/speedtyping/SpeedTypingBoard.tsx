@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, LinearProgress, Paper, Chip } from '@mui/material';
-import type {PlayerProgress, TypingText} from "../../../domain/speedtyping/speedtyping.ts";
+import { useState, useEffect, useRef } from "react";
+import { Stack, Typography, Paper, LinearProgress, Box } from "@mui/material";
+import type { TypingText, PlayerProgress } from "../../../domain/speedtyping/speedtyping";
 
 interface SpeedTypingBoardProps {
     text: TypingText;
@@ -11,15 +11,15 @@ interface SpeedTypingBoardProps {
     totalTime: number;
 }
 
-export const SpeedTypingBoard: React.FC<SpeedTypingBoardProps> = ({
-                                                                      text,
-                                                                      currentProgress,
-                                                                      onTextChange,
-                                                                      isGameStarted,
-                                                                      timeRemaining,
-                                                                      totalTime
-                                                                  }) => {
-    const [typedText, setTypedText] = useState('');
+export function SpeedTypingBoard({
+                                     text,
+                                     currentProgress,
+                                     onTextChange,
+                                     isGameStarted,
+                                     timeRemaining,
+                                     totalTime
+                                 }: SpeedTypingBoardProps) {
+    const [typedText, setTypedText] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -34,57 +34,74 @@ export const SpeedTypingBoard: React.FC<SpeedTypingBoardProps> = ({
         onTextChange(newText);
     };
 
-    const getCharacterClass = (index: number): string => {
-        if (index >= typedText.length) return 'text-gray-400';
-        if (typedText[index] === text.content[index]) return 'text-green-600 bg-green-50';
-        return 'text-red-600 bg-red-50';
+    const getCharClass = (index: number): string => {
+        if (index >= typedText.length) return "text-gray-400";
+        if (typedText[index] === text.content[index]) return "text-green-600";
+        return "text-red-600";
     };
 
     const progress = (timeRemaining / totalTime) * 100;
 
     return (
-        <Box className="space-y-4">
+        <Stack spacing={3}>
             {/* Stats */}
-            <Box className="grid grid-cols-4 gap-4">
-                <Paper className="p-4">
-                    <Typography variant="caption" color="textSecondary">WPM</Typography>
-                    <Typography variant="h4">{Math.round(currentProgress.currentWPM)}</Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
+                <Paper sx={{ p: 2, textAlign: "center", backgroundColor: "#1e1e1e" }}>
+                    <Typography variant="caption" color="text.secondary">WPM</Typography>
+                    <Typography variant="h4" color="primary">{Math.round(currentProgress.currentWPM)}</Typography>
                 </Paper>
-                <Paper className="p-4">
-                    <Typography variant="caption" color="textSecondary">Précision</Typography>
-                    <Typography variant="h4">{Math.round(currentProgress.accuracy)}%</Typography>
+                <Paper sx={{ p: 2, textAlign: "center", backgroundColor: "#1e1e1e" }}>
+                    <Typography variant="caption" color="text.secondary">Précision</Typography>
+                    <Typography variant="h4" color="success.main">{Math.round(currentProgress.accuracy)}%</Typography>
                 </Paper>
-                <Paper className="p-4">
-                    <Typography variant="caption" color="textSecondary">Erreurs</Typography>
-                    <Typography variant="h4">{currentProgress.errorCount}</Typography>
+                <Paper sx={{ p: 2, textAlign: "center", backgroundColor: "#1e1e1e" }}>
+                    <Typography variant="caption" color="text.secondary">Erreurs</Typography>
+                    <Typography variant="h4" color="error.main">{currentProgress.errorCount}</Typography>
                 </Paper>
-                <Paper className="p-4">
-                    <Typography variant="caption" color="textSecondary">Temps restant</Typography>
-                    <Typography variant="h4">{timeRemaining}s</Typography>
+                <Paper sx={{ p: 2, textAlign: "center", backgroundColor: "#1e1e1e" }}>
+                    <Typography variant="caption" color="text.secondary">Temps</Typography>
+                    <Typography variant="h4" color="warning.main">{timeRemaining}s</Typography>
                 </Paper>
             </Box>
 
-            {/* Timer Progress */}
+            {/* Timer Bar */}
             <LinearProgress
                 variant="determinate"
                 value={progress}
-                className="h-2 rounded"
-                color={timeRemaining < 10 ? 'error' : 'primary'}
+                sx={{
+                    height: 8,
+                    borderRadius: 1,
+                    backgroundColor: "#424242",
+                    "& .MuiLinearProgress-bar": {
+                        backgroundColor: timeRemaining < 10 ? "#f44336" : "#2196f3"
+                    }
+                }}
             />
 
             {/* Text Display */}
-            <Paper className="p-6 bg-gray-50">
+            <Paper sx={{ p: 3, backgroundColor: "#1e1e1e", minHeight: 120 }}>
                 <Typography
                     variant="h6"
-                    className="font-mono leading-relaxed"
                     component="div"
+                    sx={{
+                        fontFamily: "monospace",
+                        lineHeight: 1.8,
+                        letterSpacing: 1
+                    }}
                 >
-                    {text.content.split('').map((char, index) => (
+                    {text.content.split("").map((char, index) => (
                         <span
                             key={index}
-                            className={`${getCharacterClass(index)} ${
-                                index === typedText.length ? 'border-l-2 border-blue-500 animate-pulse' : ''
-                            }`}
+                            className={getCharClass(index)}
+                            style={{
+                                backgroundColor: typedText[index] === text.content[index] && index < typedText.length
+                                    ? "rgba(76, 175, 80, 0.2)"
+                                    : typedText[index] && index < typedText.length
+                                        ? "rgba(244, 67, 54, 0.2)"
+                                        : "transparent",
+                                borderLeft: index === typedText.length ? "2px solid #2196f3" : "none",
+                                paddingLeft: "2px"
+                            }}
                         >
               {char}
             </span>
@@ -98,20 +115,21 @@ export const SpeedTypingBoard: React.FC<SpeedTypingBoardProps> = ({
                 value={typedText}
                 onChange={handleChange}
                 disabled={!isGameStarted || currentProgress.hasFinished}
-                className="w-full p-4 font-mono text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                style={{
+                    width: "100%",
+                    padding: "16px",
+                    fontFamily: "monospace",
+                    fontSize: "18px",
+                    border: "2px solid #424242",
+                    borderRadius: "8px",
+                    backgroundColor: "#1e1e1e",
+                    color: "#fff",
+                    outline: "none",
+                    resize: "none"
+                }}
                 rows={4}
-                placeholder={isGameStarted ? 'Commencez à taper...' : 'En attente du démarrage...'}
+                placeholder={isGameStarted ? "Commencez à taper..." : "En attente du démarrage..."}
             />
-
-            {/* Difficulty Badge */}
-            <Chip
-                label={`Difficulté: ${text.difficulty}`}
-                color={
-                    text.difficulty === 'Easy' ? 'success' :
-                        text.difficulty === 'Medium' ? 'warning' :
-                            'error'
-                }
-            />
-        </Box>
+        </Stack>
     );
-};
+}

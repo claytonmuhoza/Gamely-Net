@@ -1,3 +1,4 @@
+using GamePlatform.Application.Interfaces.Services;
 using GamePlatform.Application.Lobbies;
 using Microsoft.AspNetCore.Mvc;
 

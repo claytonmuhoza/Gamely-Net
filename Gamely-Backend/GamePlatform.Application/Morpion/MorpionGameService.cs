@@ -1,4 +1,5 @@
 using GamePlatform.Application.Interfaces.Repositories;
+using GamePlatform.Application.Interfaces.Services;
 using GamePlatform.Application.Lobbies;
 using GamePlatforme.domain.Entities;
 using GamePlatforme.domain.Enums;

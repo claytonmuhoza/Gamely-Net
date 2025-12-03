@@ -1,76 +1,96 @@
+
 import * as signalR from "@microsoft/signalr";
-import {createSignalRConnection} from "../signalRConnectionFactory.ts";
-import type {PlayerProgress, PlayerResult, SpeedTypingGame} from "../../../domain/speedtyping/speedtyping.ts";
+import { createSignalRConnection } from "../signalRConnectionFactory";
+import { SpeedTypingGame } from "../../../domain/speedtyping/speedtyping";
+
+type GameUpdatedHandler = (game: SpeedTypingGame) => void;
+type ErrorHandler = (error: any) => void;
 
 export class SpeedTypingSignalRClient {
-  private connection: signalR.HubConnection;
-  private isConnected = false;
+    private connection: signalR.HubConnection;
+    private gameUpdatedHandlers: GameUpdatedHandler[] = [];
+    private errorHandlers: ErrorHandler[] = [];
+    private handlersRegistered = false;
 
-  constructor() {
-    this.connection = createSignalRConnection('/hubs/speedtyping');
-  }
+    constructor() {
+        this.connection = createSignalRConnection("/hubs/speedtyping");
+    }
 
-  async connect(): Promise<void> {
-    if (this.isConnected) return;
+    onGameUpdated(handler: GameUpdatedHandler) {
+        this.gameUpdatedHandlers.push(handler);
+    }
 
-    await this.connection.start();
-    this.isConnected = true;
-    console.log('SpeedTyping SignalR connected');
-  }
+    onError(handler: ErrorHandler) {
+        this.errorHandlers.push(handler);
+    }
 
-  async disconnect(): Promise<void> {
-    if (!this.isConnected) return;
+    private registerHandlers() {
+        if (this.handlersRegistered) return;
+        this.handlersRegistered = true;
 
-    await this.connection.stop();
-    this.isConnected = false;
-    console.log('SpeedTyping SignalR disconnected');
-  }
+        this.connection.on("GameUpdated", (dto: any) => {
+            console.log("[SpeedTypingSignalR] GameUpdated reçu", dto);
+            const game = SpeedTypingGame.fromDto(dto);
+            this.gameUpdatedHandlers.forEach((h) => h(game));
+        });
 
-  async joinGame(gameId: string): Promise<void> {
-    await this.connection.invoke('JoinGame', gameId);
-  }
+        this.connection.on("GameState", (dto: any) => {
+            console.log("[SpeedTypingSignalR] GameState reçu", dto);
+            const game = SpeedTypingGame.fromDto(dto);
+            this.gameUpdatedHandlers.forEach((h) => h(game));
+        });
 
-  async leaveGame(gameId: string): Promise<void> {
-    await this.connection.invoke('LeaveGame', gameId);
-  }
+        this.connection.on("GameStarted", (dto: any) => {
+            console.log("[SpeedTypingSignalR] GameStarted reçu", dto);
+            const game = SpeedTypingGame.fromDto(dto);
+            this.gameUpdatedHandlers.forEach((h) => h(game));
+        });
 
-  async startGame(gameId: string): Promise<void> {
-    await this.connection.invoke('StartGame', gameId);
-  }
+        this.connection.on("Error", (err) => {
+            console.error("[SpeedTypingSignalR] Error event", err);
+            this.errorHandlers.forEach((h) => h(err));
+        });
+    }
 
-  async updateProgress(gameId: string, playerId: string, typedText: string): Promise<void> {
-    await this.connection.invoke('UpdateProgress', gameId, playerId, typedText);
-  }
+    async start(): Promise<void> {
+        if (
+            this.connection.state === signalR.HubConnectionState.Connected ||
+            this.connection.state === signalR.HubConnectionState.Connecting
+        ) {
+            return;
+        }
 
-  async getResults(gameId: string): Promise<void> {
-    await this.connection.invoke('GetResults', gameId);
-  }
+        this.registerHandlers();
 
-  onGameStarted(callback: (data: any) => void): void {
-    this.connection.on('GameStarted', callback);
-  }
+        try {
+            await this.connection.start();
+            console.log("[SpeedTypingSignalR] Connection started");
+        } catch (err) {
+            console.error("[SpeedTypingSignalR] Failed to start", err);
+            this.errorHandlers.forEach((h) => h(err as Error));
+            throw err;
+        }
+    }
 
-  onPlayerProgressUpdated(callback: (progress: PlayerProgress) => void): void {
-    this.connection.on('PlayerProgressUpdated', callback);
-  }
+    async stop(): Promise<void> {
+        if (this.connection.state === signalR.HubConnectionState.Disconnected) return;
+        await this.connection.stop();
+    }
 
-  onPlayerFinished(callback: (data: any) => void): void {
-    this.connection.on('PlayerFinished', callback);
-  }
+    async joinGame(gameId: string, playerId: string): Promise<void> {
+        await this.start();
+        console.log("[SpeedTypingSignalR] JoinGame invoke", gameId, playerId);
+        await this.connection.invoke("JoinGame", gameId, playerId);
+    }
 
-  onGameResults(callback: (results: PlayerResult[]) => void): void {
-    this.connection.on('GameResults', callback);
-  }
+    async startGame(gameId: string): Promise<void> {
+        await this.start();
+        console.log("[SpeedTypingSignalR] StartGame invoke", gameId);
+        await this.connection.invoke("StartGame", gameId);
+    }
 
-  onTimeUp(callback: (data: any) => void): void {
-    this.connection.on('TimeUp', callback);
-  }
-
-  onError(callback: (error: any) => void): void {
-    this.connection.on('Error', callback);
-  }
-
-  onGameState(callback: (game: SpeedTypingGame) => void): void {
-    this.connection.on('GameState', callback);
-  }
+    async updateProgress(gameId: string, playerId: string, typedText: string): Promise<void> {
+        await this.start();
+        await this.connection.invoke("UpdateProgress", gameId, playerId, typedText);
+    }
 }

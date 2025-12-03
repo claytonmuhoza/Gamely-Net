@@ -1,8 +1,11 @@
-import type {SpeedTypingRepository} from "../ports/SpeedTypingRepository.ts";
+import type { SpeedTypingRepository } from "../ports/SpeedTypingRepository";
+import type { SpeedTypingGame } from "../../../domain/speedtyping/speedtyping";
 
-export const startSpeedTypingGameUseCase = async (
-    repository: SpeedTypingRepository,
-    gameId: string
-): Promise<void> => {
-    await repository.startGame(gameId);
-};
+export class StartSpeedTypingGameUseCase {
+    constructor(private readonly repo: SpeedTypingRepository) {}
+
+    async execute(lobbyId: string): Promise<SpeedTypingGame> {
+        if (!lobbyId) throw new Error("LobbyId obligatoire");
+        return this.repo.start(lobbyId);
+    }
+}

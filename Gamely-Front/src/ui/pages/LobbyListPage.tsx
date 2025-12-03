@@ -1,185 +1,269 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Typography,
-  Button,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Stack,
+    Container,
+    Stack,
+    Typography,
+    Button,
+    Box,
+    CircularProgress,
+    Alert,
+    Fab
 } from "@mui/material";
-import { useCases } from "../../app/compositionRoot";
-import { GameType, Lobby } from "../../domain/lobby/lobby";
+import { Add, Refresh } from "@mui/icons-material";
 import { useCurrentPlayer } from "../../app/hook/useCurrentPlayer";
+import { useCases } from "../../app/compositionRoot";
+import { CreateLobbyDialog } from "../components/lobby/CreateLobbyDialog";
+import { JoinLobbyDialog } from "../components/lobby/JoinLobbyDialog";
+import { LobbyCard } from "../components/lobby/LobbyCard";
+import type { Lobby } from "../../domain/lobby/lobby";
+import type { GameType } from "../../domain/lobby/lobby";
 
 export function LobbyListPage() {
-  const { player } = useCurrentPlayer();
-  const navigate = useNavigate();
+    const { player } = useCurrentPlayer();
+    const navigate = useNavigate();
 
-  const [lobbies, setLobbies] = useState<Lobby[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [joiningLobbyId, setJoiningLobbyId] = useState<string | null>(null);
-  const [startingLobbyId, setStartingLobbyId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+    const [lobbies, setLobbies] = useState<Lobby[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [joinDialog, setJoinDialog] = useState<{
+        open: boolean;
+        lobby: Lobby | null;
+    }>({ open: false, lobby: null });
 
-  useEffect(() => {
-    if (!player) {
-      navigate("/");
-      return;
-    }
-
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await useCases.lobby.listOpen.execute();
-        setLobbies(data);
-      } catch (err) {
-        const message = "Erreur lors du chargement des lobbys";
-        console.log(err)
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
+    const loadLobbies = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const result = await useCases.lobby.listOpen.execute();
+            setLobbies(result);
+        } catch (err: any) {
+            setError(err.message || "Erreur lors du chargement des lobbies");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    load();
-  }, [player, navigate]);
+    useEffect(() => {
+        loadLobbies();
+        // Auto-refresh every 5 seconds
+        const interval = setInterval(loadLobbies, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
-  const handleCreateMorpionLobby = async () => {
-    if (!player) return;
-    try {
-      setCreating(true);
-      await useCases.lobby.create.execute({
-        hostPlayerId: player.id,
-        gameType: GameType.SpeedTyping,
-        isPrivate: false,
-      });
-      const data = await useCases.lobby.listOpen.execute();
-      setLobbies(data);
-    } catch (err) {
-      const message ="Erreur lors de la création du lobby";
-      console.log(err)
-      setError(message);
-    } finally {
-      setCreating(false);
+    const handleCreateLobby = async (data: {
+        gameType: GameType;
+        isPrivate: boolean;
+        password?: string;
+    }) => {
+        if (!player) {
+            setError("Vous devez être connecté pour créer un lobby");
+            return;
+        }
+
+        try {
+            const lobby = await useCases.lobby.create.execute({
+                hostPlayerId: player.id,
+                gameType: data.gameType,
+                isPrivate: data.isPrivate,
+                password: data.password
+            });
+
+            await loadLobbies();
+            // Optionally navigate to lobby detail page
+            // navigate(`/lobby/${lobby.id}`);
+        } catch (err: any) {
+            setError(err.message || "Erreur lors de la création du lobby");
+            throw err;
+        }
+    };
+
+    const handleJoinLobby = (lobby: Lobby) => {
+        if (!player) {
+            setError("Vous devez être connecté pour rejoindre un lobby");
+            return;
+        }
+
+        if (lobby.isPrivate) {
+            setJoinDialog({ open: true, lobby });
+        } else {
+            performJoin(lobby);
+        }
+    };
+
+    const performJoin = async (lobby: Lobby, password?: string) => {
+        if (!player) return;
+
+        try {
+            await useCases.lobby.join.execute({
+                lobbyId: lobby.id,
+                playerId: player.id,
+                password
+            });
+            await loadLobbies();
+        } catch (err: any) {
+            setError(err.message || "Erreur lors de la connexion au lobby");
+            throw err;
+        }
+    };
+
+    const handleStartGame = async (lobby: Lobby) => {
+        try {
+            // Start game based on game type
+            switch (lobby.gameType) {
+                case 0: // SpeedTyping
+                    { const speedTypingGame = await useCases.speedtyping.start.execute(lobby.id);
+                    navigate(`/speedtyping/${speedTypingGame.id}`);
+                    break; }
+                case 2: // Morpion
+                    { const morpionGame = await useCases.morpion.start.execute(lobby.id);
+                    navigate(`/morpion/${morpionGame.id}`);
+                    break; }
+                default:
+                    setError("Ce jeu n'est pas encore implémenté");
+            }
+        } catch (err: any) {
+            setError(err.message || "Erreur lors du démarrage de la partie");
+        }
+    };
+
+    if (!player) {
+        return (
+            <Container sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0a0a0a" }}>
+                <Alert severity="warning" sx={{ maxWidth: 500 }}>
+                    Veuillez d&apos;abord choisir un pseudo pour accéder aux lobbies.
+                </Alert>
+            </Container>
+        );
     }
-  };
 
-  const handleJoinLobby = async (lobby: Lobby) => {
-    if (!player) return;
-    try {
-      setJoiningLobbyId(lobby.id);
-      await useCases.lobby.join.execute({
-        lobbyId: lobby.id,
-        playerId: player.id,
-      });
-      // On pourrait rediriger vers une future page LobbyDetail ici
-      // Pour l'instant, on se contente de rafraîchir la liste
-      const data = await useCases.lobby.listOpen.execute();
-      setLobbies(data);
-    } catch (err) {
-      const message = "Erreur lors de la jointure du lobby";
-      console.log(err);
-      setError(message);
-    } finally {
-      setJoiningLobbyId(null);
-    }
-  };
+    return (
+        <div style={{ minHeight: "100vh", backgroundColor: "#0a0a0a", padding: "32px 16px" }}>
+            <Container maxWidth="lg">
+                <Stack spacing={4}>
+                    {/* Header */}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box>
+                            <Typography variant="h3" fontWeight="bold" gutterBottom>
+                                🎮 Lobbies de jeu
+                            </Typography>
+                            <Typography variant="body1" color="text.secondary">
+                                Rejoignez une partie ou créez votre propre lobby
+                            </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<Refresh />}
+                                onClick={loadLobbies}
+                                disabled={loading}
+                            >
+                                Actualiser
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<Add />}
+                                onClick={() => setCreateDialogOpen(true)}
+                                size="large"
+                            >
+                                Créer un lobby
+                            </Button>
+                        </Stack>
+                    </Box>
 
-  const handleStartMorpionGame = async (lobby: Lobby) => {
-    if (!player) return;
-    try {
-      setStartingLobbyId(lobby.id);
-      const game = await useCases.morpion.start.execute(lobby.id);
-      navigate(`/morpion/${game.id}`);
-    } catch (err) {
-      const message =  "Erreur lors du démarrage de la partie";
-      setError(message);
-      console.log(err);
-    } finally {
-      setStartingLobbyId(null);
-    }
-  };
+                    {/* Error */}
+                    {error && (
+                        <Alert severity="error" onClose={() => setError(null)}>
+                            {error}
+                        </Alert>
+                    )}
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <Stack direction="row" justifyContent="space-between" alignItems="center" className="mb-4">
-          <Typography variant="h5">Lobbys ouverts</Typography>
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={() => window.location.reload()} disabled={loading}>
-              Rafraîchir
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleCreateMorpionLobby}
-              disabled={creating}
-            >
-              {creating ? "Création..." : "Créer un lobby Morpion"}
-            </Button>
-          </Stack>
-        </Stack>
+                    {/* Loading */}
+                    {loading && lobbies.length === 0 && (
+                        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                            <CircularProgress size={60} />
+                        </Box>
+                    )}
 
-        {error && (
-          <Typography color="error" className="mb-4">
-            {error}
-          </Typography>
-        )}
+                    {/* Empty State */}
+                    {!loading && lobbies.length === 0 && (
+                        <Box sx={{ textAlign: "center", py: 8 }}>
+                            <Typography variant="h5" color="text.secondary" gutterBottom>
+                                Aucun lobby disponible
+                            </Typography>
+                            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                                Soyez le premier à créer un lobby !
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={<Add />}
+                                onClick={() => setCreateDialogOpen(true)}
+                            >
+                                Créer le premier lobby
+                            </Button>
+                        </Box>
+                    )}
 
-        <Paper className="p-4">
-          {loading ? (
-            <Typography>Chargement...</Typography>
-          ) : lobbies.length === 0 ? (
-            <Typography>Aucun lobby disponible pour le moment.</Typography>
-          ) : (
-            <List>
-              {lobbies.map((lobby) => {
-              const canJoin = lobby.canJoin(player);
-              const canStart = lobby.canStartGame(player);
-              const isMorpion = lobby.gameType === GameType.Morpion;
-
-              return (
-              <ListItem
-                key={lobby.id}
-                divider
-                className="flex flex-col md:flex-row md:items-center md:justify-between gap-2"
-              >
-              <ListItemText
-                  primary={`Lobby ${lobby.code} – ${GameType[lobby.gameType]} (${lobby.getPlayerCountLabel()})`}
-                  secondary={lobby.isPrivate ? "Privé" : "Public"}
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    disabled={joiningLobbyId === lobby.id || !canJoin}
-                    onClick={() => handleJoinLobby(lobby)}
-                  >
-                    {joiningLobbyId === lobby.id ? "Jointure..." : canJoin ? "Rejoindre" : "Complet"}
-                  </Button>
-                  {isMorpion && (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={!canStart || startingLobbyId === lobby.id}
-                      onClick={() => handleStartMorpionGame(lobby)}
-                    >
-                      {startingLobbyId === lobby.id
-                        ? "Démarrage..."
-                        : canStart
-                        ? "Démarrer la partie"
-                        : "En attente de joueurs"}
-                    </Button>
-                  )}
+                    {/* Lobby Grid */}
+                    {lobbies.length > 0 && (
+                        <Box
+                            sx={{
+                                display: "grid",
+                                gridTemplateColumns: {
+                                    xs: "1fr",
+                                    sm: "repeat(2, 1fr)",
+                                    md: "repeat(3, 1fr)"
+                                },
+                                gap: 3
+                            }}
+                        >
+                            {lobbies.map((lobby) => (
+                                <LobbyCard
+                                    key={lobby.id}
+                                    lobby={lobby}
+                                    currentPlayer={player}
+                                    onJoin={handleJoinLobby}
+                                    onStart={handleStartGame}
+                                />
+                            ))}
+                        </Box>
+                    )}
                 </Stack>
-              </ListItem>);
-              })}
-            </List>
-          )}
-        </Paper>
-      </div>
-    </div>
-  );
+            </Container>
+
+            {/* Dialogs */}
+            <CreateLobbyDialog
+                open={createDialogOpen}
+                onClose={() => setCreateDialogOpen(false)}
+                onSubmit={handleCreateLobby}
+            />
+
+            {joinDialog.lobby && (
+                <JoinLobbyDialog
+                    open={joinDialog.open}
+                    onClose={() => setJoinDialog({ open: false, lobby: null })}
+                    lobbyId={joinDialog.lobby.id}
+                    lobbyCode={joinDialog.lobby.code}
+                    isPrivate={joinDialog.lobby.isPrivate}
+                    onSubmit={(password) => performJoin(joinDialog.lobby!, password)}
+                />
+            )}
+
+            {/* FAB for mobile */}
+            <Fab
+                color="primary"
+                sx={{
+                    position: "fixed",
+                    bottom: 24,
+                    right: 24,
+                    display: { xs: "flex", md: "none" }
+                }}
+                onClick={() => setCreateDialogOpen(true)}
+            >
+                <Add />
+            </Fab>
+        </div>
+    );
 }
