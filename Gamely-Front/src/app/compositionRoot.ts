@@ -32,10 +32,13 @@ export const useCases = {
     get: new GetMorpionGameUseCase(morpionRepository),
     playMove: new PlayMorpionMoveUseCase(morpionRepository),
   },
-    speedtyping: {
-        start: new StartSpeedTypingGameUseCase(speedtypingRepository),
-        get: new GetSpeedTypingGameUseCase(speedtypingRepository),
-    }
+  speedtyping: {
+    start: new StartSpeedTypingGameUseCase(speedtypingRepository),
+    get: new GetSpeedTypingGameUseCase(speedtypingRepository),
+  },
+  puissance: {
+    start: new StartMorpionGameUseCase(morpionRepository),
+    get: new GetMorpionGameUseCase(morpionRepository),
+    playMove: new PlayMorpionMoveUseCase(morpionRepository),
+  }
 };
-
-

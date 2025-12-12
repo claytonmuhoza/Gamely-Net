@@ -47,4 +47,5 @@ export class MorpionHttpRepository implements MorpionRepository {
     });
     return this.map(response.data);
   }
+
 }
