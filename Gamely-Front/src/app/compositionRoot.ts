@@ -28,6 +28,11 @@ export const useCases = {
     start: new StartMorpionGameUseCase(morpionRepository),
     get: new GetMorpionGameUseCase(morpionRepository),
     playMove: new PlayMorpionMoveUseCase(morpionRepository),
-
   },
+  puissance: {
+    start: new StartMorpionGameUseCase(morpionRepository),
+    get: new GetMorpionGameUseCase(morpionRepository),
+    playMove: new PlayMorpionMoveUseCase(morpionRepository),
+  }
+  
 };
