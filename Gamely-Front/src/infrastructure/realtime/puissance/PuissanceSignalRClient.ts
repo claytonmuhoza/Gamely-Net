@@ -72,18 +72,45 @@ export class PuissanceSignalRClient {
         });
     }
 
-    async startConnection() {
-        this.registerHandlers();
+    async start() {
         if (this.connection.state === signalR.HubConnectionState.Disconnected ) {
-            await this.connection.start();
-            console.log("[PuissanceSignalR] Connexion démarrée");
+            this.registerHandlers();
+            try{
+                await this.connection.start();
+                console.log("[PuissanceSignalR] Connexion démarrée");
+            }catch (e) {
+                console.error("[PuissanceSignalR] Erreur de connexion", e);
+                throw e;
+            }
+
         }
     }
 
-    async stopConnection() {
+    async stop() {
         if (this.connection.state === signalR.HubConnectionState.Connected) {
             await this.connection.stop();
             console.log("[PuissanceSignalR] Connexion arrêtée");
+        }
+    }
+
+    async joinGame(gameId: string, playerId: string) {
+        await this.start();
+        try {
+            await this.connection.invoke("JoinGame", gameId, playerId);
+            console.log("[PuissanceSignalR] Rejoint le jeu", gameId);
+        } catch (e) {
+            console.error("[PuissanceSignalR] Erreur en rejoignant le jeu", e);
+            throw e;
+        }
+    }
+
+    async playMove(gameId: string, playerId: string, columnIndex: number) {
+        try {
+            await this.connection.invoke("PlayMove", gameId, playerId, columnIndex);
+            console.log("[PuissanceSignalR] Move joué", { gameId, playerId, columnIndex });
+        } catch (e) {
+            console.error("[PuissanceSignalR] Erreur en jouant le move", e);
+            throw e;
         }
     }
 }

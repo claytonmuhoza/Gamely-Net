@@ -1,13 +1,13 @@
 import { Paper, Stack, Box } from '@mui/material';
 import Column from './column.tsx';
 
-interface PuissanceBoardProps {
+interface BoardProps {
     grid: string[][];
     onColumnClick: (columnIndex: number) => void;
     isMyTurn: boolean;
 }
 
-const PuissanceBoard = ({ grid, onColumnClick, isMyTurn }: PuissanceBoardProps) => {
+const Board = ({ grid, onColumnClick, isMyTurn }: BoardProps) => {
     return (
         <Box display="flex" justifyContent="center" mt={2}>
             <Paper
@@ -20,7 +20,7 @@ const PuissanceBoard = ({ grid, onColumnClick, isMyTurn }: PuissanceBoardProps) 
                 }}
             >
                 <Stack direction="row" spacing={{ xs: 0.5, md: 1 }}>
-                    {grid.map((columnCells, colIndex) => (
+                    {grid.map((columnCells: string[], colIndex: number) => (
                         <Column
                             key={colIndex}
                             columnIndex={colIndex}
@@ -35,4 +35,4 @@ const PuissanceBoard = ({ grid, onColumnClick, isMyTurn }: PuissanceBoardProps) 
     );
 };
 
-export default PuissanceBoard;
+export default Board;
