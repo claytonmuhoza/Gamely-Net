@@ -12,11 +12,18 @@ import { JoinLobbyUseCase } from "../application/lobby/usecases/joinLobby.usecas
 import {SpeedTypingHttpRepository} from "../infrastructure/http/speedtyping/SpeedTypingHttpRepository.ts";
 import {StartSpeedTypingGameUseCase} from "../application/speedtyping/usecases/startSpeedTypingGame.usecase.ts";
 import {GetSpeedTypingGameUseCase} from "../application/speedtyping/usecases/getSpeedTypingGame.usecase.ts";
+
+import {GetPuissanceGameUseCase} from "../application/puissance/usecases/getPuissanceGame.usecase";
+import {StartPuissanceGameUseCase} from "../application/puissance/usecases/StartPuissanceGame.usecase";
+import {PlayPuissanceUsecase} from "../application/puissance/usecases/PlayPuissance.usecase";
+import {PuissanceHttpRepository} from "../infrastructure/http/puissance/PuissanceHttpRepository";
+
 // Repositories
 const playerRepository = new PlayerHttpRepository();
 const lobbyRepository = new LobbyHttpRepository();
 const morpionRepository = new MorpionHttpRepository();
 const speedtypingRepository = new SpeedTypingHttpRepository();
+const puissanceRepository = new PuissanceHttpRepository();
 // Use cases
 export const useCases = {
   player: {
@@ -37,8 +44,8 @@ export const useCases = {
     get: new GetSpeedTypingGameUseCase(speedtypingRepository),
   },
   puissance: {
-    start: new StartMorpionGameUseCase(morpionRepository),
-    get: new GetMorpionGameUseCase(morpionRepository),
-    playMove: new PlayMorpionMoveUseCase(morpionRepository),
+     start: new StartPuissanceGameUseCase(puissanceRepository),
+     get: new GetPuissanceGameUseCase(puissanceRepository),
+     playMove: new PlayPuissanceUsecase(puissanceRepository),
   }
 };
