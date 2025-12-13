@@ -1,3 +1,20 @@
+// typescript
+import {LobbyHttpRepository} from "../infrastructure/http/lobby/LobbyHttpRepository";
+import {PlayerHttpRepository} from "../infrastructure/http/player/PlayerHttpRepository";
+
+import {RegisterPlayerUseCase} from "../application/player/usecases/registerPlayer.usecase";
+import {CreateLobbyUseCase} from "../application/lobby/usecases/createLobby.usecase";
+import {ListOpenLobbiesUseCase} from "../application/lobby/usecases/listOpenLobbies.usecase";
+import {StartMorpionGameUseCase} from "../application/morpion/usecases/startMorpionGame.usecase";
+import {GetMorpionGameUseCase} from "../application/morpion/usecases/getMorpionGame.usecase";
+import {PlayMorpionMoveUseCase} from "../application/morpion/usecases/playMorpionMove.usecase";
+import {MorpionHttpRepository} from "../infrastructure/http/morpion/MorpionHttpRepository";
+import {JoinLobbyUseCase} from "../application/lobby/usecases/joinLobby.usecase";
+
+import {GetPuissanceGameUseCase} from "../application/puissance/usecases/getPuissanceGame.usecase";
+import {StartPuissanceGameUseCase} from "../application/puissance/usecases/StartPuissanceGame.usecase";
+import {PlayPuissanceUsecase} from "../application/puissance/usecases/PlayPuissance.usecase";
+import {PuissanceHttpRepository} from "../infrastructure/http/puissance/PuissanceHttpRepository";
 import { LobbyHttpRepository } from "../infrastructure/http/lobby/LobbyHttpRepository";
 import { PlayerHttpRepository } from "../infrastructure/http/player/PlayerHttpRepository";
 import { MorpionHttpRepository } from "../infrastructure/http/morpion/MorpionHttpRepository";
@@ -20,6 +37,7 @@ import { UpdateProgressUseCase } from "../application/speedTyping/usecases/updat
 const playerRepository = new PlayerHttpRepository();
 const lobbyRepository = new LobbyHttpRepository();
 const morpionRepository = new MorpionHttpRepository();
+const puissanceRepository = new PuissanceHttpRepository();
 const speedTypingRepository = new SpeedTypingHttpRepository();
 
 // Use cases
@@ -37,6 +55,11 @@ export const useCases = {
         get: new GetMorpionGameUseCase(morpionRepository),
         playMove: new PlayMorpionMoveUseCase(morpionRepository),
     },
+    puissance: {
+        start: new StartPuissanceGameUseCase(puissanceRepository),
+        get: new GetPuissanceGameUseCase(puissanceRepository),
+        playMove: new PlayPuissanceUsecase(puissanceRepository),
+    }
     speedTyping: {
         start: new StartSpeedTypingGameUseCase(speedTypingRepository),
         get: new GetSpeedTypingGameUseCase(speedTypingRepository),
