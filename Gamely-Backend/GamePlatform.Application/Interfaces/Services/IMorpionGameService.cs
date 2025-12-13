@@ -1,4 +1,6 @@
-namespace GamePlatform.Application.Morpion;
+using GamePlatform.Application.Morpion;
+
+namespace GamePlatform.Application.Interfaces.Services;
 
 public interface IMorpionGameService
 {

@@ -1,3 +1,4 @@
+using GamePlatform.Application.Interfaces.Repositories;
 using GamePlatform.Application.Players;
 using GamePlatform.Infrastructure.Persistence;
 using GamePlatforme.domain.Entities;
@@ -24,5 +25,10 @@ public class PlayerRepository : IPlayerRepository
     public Task<Player?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _context.Players.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public Task<List<Player>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return _context.Players.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
     }
 }

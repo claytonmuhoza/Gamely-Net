@@ -1,6 +1,6 @@
 using GamePlatforme.domain.Entities;
 
-namespace GamePlatform.Application.Morpion;
+namespace GamePlatform.Application.Interfaces.Repositories;
 
 public interface IMorpionGameRepository
 {

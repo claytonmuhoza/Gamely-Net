@@ -1,3 +1,4 @@
+using GamePlatform.Application.Interfaces.Services;
 using GamePlatform.Application.Lobbies;
 using GamePlatform.Application.Players;
 using Microsoft.AspNetCore.SignalR;

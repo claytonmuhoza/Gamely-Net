@@ -1,4 +1,6 @@
-namespace GamePlatform.Application.Lobbies;
+using GamePlatform.Application.Lobbies;
+
+namespace GamePlatform.Application.Interfaces.Services;
 
 public interface ILobbyService
 {
