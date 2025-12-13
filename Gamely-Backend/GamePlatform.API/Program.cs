@@ -21,8 +21,9 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins("http://localhost:5173") // votre front Vite
             .AllowAnyHeader()
-            .AllowAnyMethod();
-            // pas besoin d'AllowCredentials si vous avez withCredentials: false côté client
+            .AllowAnyMethod()
+            .AllowCredentials();
+        // pas besoin d'AllowCredentials si vous avez withCredentials: false côté client
     });
 });
 
@@ -82,5 +83,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
 app.MapHub<LobbyHub>("/hubs/lobby");
 app.MapHub<MorpionHub>("/hubs/morpion");
+app.MapHub<PuissanceHub>("/hubs/puissance");
 
 app.Run();
