@@ -1,8 +1,8 @@
 ﻿using GamePlatform.Application.Interfaces.Repositories;
 using GamePlatform.Application.Interfaces.Services;
 using GamePlatforme.domain.Entities;
-using GamePlatform.Application.Lobbies;
-using GamePlatform.Application.Interfaces.Repositories;
+
+
 namespace GamePlatform.Application.Puissance;
 
 public class PuissanceGameService : IPuissanceGameService

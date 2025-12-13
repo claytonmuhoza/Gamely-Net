@@ -4,6 +4,7 @@ using GamePlatforme.domain.Entities.SpeedTyping;
 using GamePlatforme.domain.Enums;
 
 namespace GamePlatform.Application.SpeedTyping;
+
 public class SpeedTypingGameService : ISpeedTypingGameService
 {
     private readonly ISpeedTypingGameRepository _gameRepo;
@@ -41,7 +42,24 @@ public class SpeedTypingGameService : ISpeedTypingGameService
                    ?? throw new InvalidOperationException($"No text found for difficulty {difficulty}");
 
         var game = new SpeedTypingGame(lobby.Id, text, lobby.PlayerIds, command.DurationSeconds);
+        Console.Write("Ids joueurs", lobby.PlayerIds);
         game = await _gameRepo.AddAsync(game, cancellationToken);
+
+        return await MapToDto(game, cancellationToken);
+    }
+
+    // ✅ NOUVELLE MÉTHODE - Démarrer un jeu existant
+    public async Task<SpeedTypingGameDto?> StartGameAsync(Guid gameId, CancellationToken cancellationToken = default)
+    {
+        var game = await _gameRepo.GetByIdAsync(gameId, cancellationToken);
+        if (game is null)
+            return null;
+
+        // Appeler la méthode Start() de l'entité domain
+        game.Start();
+
+        // Persister le changement
+        await _gameRepo.UpdateAsync(game, cancellationToken);
 
         return await MapToDto(game, cancellationToken);
     }

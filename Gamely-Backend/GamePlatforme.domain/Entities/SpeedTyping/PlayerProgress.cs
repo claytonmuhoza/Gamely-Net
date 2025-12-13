@@ -2,15 +2,18 @@ namespace GamePlatforme.domain.Entities.SpeedTyping;
 
 public class PlayerProgress
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public Guid PlayerId { get; private set; }
-    public string CurrentTypedText { get; private set; }
-    public int CorrectCharacters { get; private set; }
-    public int TotalCharacters { get; private set; }
-    public int ErrorCount { get; private set; }
-    public bool HasFinished { get; private set; }
-    public DateTime? FinishedAt { get; private set; }
-    public TimeSpan? CompletionTime { get; private set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid PlayerId { get; set; }
+    public string CurrentTypedText { get; set; }
+    public int CorrectCharacters { get; set; }
+    public int TotalCharacters { get; set; }
+    public int ErrorCount { get; set; }
+    public bool HasFinished { get; set; }
+    public DateTime? FinishedAt { get; set; }
+    public TimeSpan? CompletionTime { get; set; }
+
+    // ⚠️ AJOUT : Foreign key pour EF Core
+    public Guid? SpeedTypingGameId { get; set; }
 
     protected PlayerProgress() 
     { 

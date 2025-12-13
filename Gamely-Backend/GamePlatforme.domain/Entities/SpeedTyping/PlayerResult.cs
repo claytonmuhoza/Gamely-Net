@@ -1,14 +1,18 @@
 namespace GamePlatforme.domain.Entities.SpeedTyping;
 
 public class PlayerResult
-{   public Guid Id { get; private set; } = Guid.NewGuid();
-    public Guid PlayerId { get; private set; }
-    public int Rank { get; private set; }
-    public TimeSpan CompletionTime { get; private set; }
-    public double Accuracy { get; private set; }
-    public double WPM { get; private set; }
-    public int ErrorCount { get; private set; }
-    public int Score { get; private set; }
+{   
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid PlayerId { get; set; }
+    public int Rank { get; set; }
+    public TimeSpan CompletionTime { get; set; }
+    public double Accuracy { get; set; }
+    public double WPM { get; set; }
+    public int ErrorCount { get; set; }
+    public int Score { get; set; }
+
+    // ⚠️ AJOUT : Foreign key pour EF Core
+    public Guid? SpeedTypingGameId { get; set; }
 
     protected PlayerResult() { }
 

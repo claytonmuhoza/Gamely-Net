@@ -23,7 +23,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
-        // pas besoin d'AllowCredentials si vous avez withCredentials: false côté client
     });
 });
 
@@ -84,5 +83,5 @@ app.MapControllers();
 app.MapHub<LobbyHub>("/hubs/lobby");
 app.MapHub<MorpionHub>("/hubs/morpion");
 app.MapHub<PuissanceHub>("/hubs/puissance");
-
+app.MapHub<SpeedTypingHub>("/hubs/speedtyping");
 app.Run();

@@ -2,16 +2,20 @@ namespace GamePlatforme.domain.Entities.SpeedTyping;
 
 public class SpeedTypingGame
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public Guid LobbyId { get; private set; }
-    public TypingText Text { get; private set; }
-    public SpeedTypingStatus Status { get; private set; }
-    public DateTime? StartedAt { get; private set; }
-    public DateTime? FinishedAt { get; private set; }
-    public List<PlayerProgress> PlayerProgresses { get; private set; }
-    public List<PlayerResult> Results { get; private set; }
-    public int DurationSeconds { get; private set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid LobbyId { get; set; }
+    public TypingText Text { get; set; }
+    public SpeedTypingStatus Status { get; set; }
+    public DateTime? StartedAt { get; set; }
+    public DateTime? FinishedAt { get; set; }
+    
+    // ⚠️ CHANGEMENT CRITIQUE : Passer de private set à public set pour EF Core
+    public List<PlayerProgress> PlayerProgresses { get; set; }
+    public List<PlayerResult> Results { get; set; }
+    
+    public int DurationSeconds { get; set; }
 
+    // Constructeur pour EF Core
     protected SpeedTypingGame() 
     { 
         Text = null!;
@@ -57,6 +61,17 @@ public class SpeedTypingGame
 
         if (!StartedAt.HasValue)
             throw new InvalidOperationException("Game has not started");
+
+        // ✅ AJOUT DE LOGS POUR DEBUG
+        Console.WriteLine($"[SpeedTypingGame] UpdatePlayerProgress - PlayerId: {playerId}");
+        Console.WriteLine($"[SpeedTypingGame] PlayerProgresses count: {PlayerProgresses?.Count ?? 0}");
+        if (PlayerProgresses != null)
+        {
+            foreach (var p in PlayerProgresses)
+            {
+                Console.WriteLine($"[SpeedTypingGame] - Has player: {p.PlayerId}");
+            }
+        }
 
         var progress = PlayerProgresses.FirstOrDefault(p => p.PlayerId == playerId);
         if (progress == null)

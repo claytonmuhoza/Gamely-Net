@@ -23,16 +23,33 @@ public class SpeedTypingGameRepository : ISpeedTypingGameRepository
 
     public async Task<SpeedTypingGame?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.SpeedTypingGames
+        var game = await _context.SpeedTypingGames
             .Include(g => g.Text)
+         
             .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
+
+        if (game != null)
+        {
+            await _context.Entry(game).Collection(g => g.PlayerProgresses).LoadAsync(cancellationToken);
+            await _context.Entry(game).Collection(g => g.Results).LoadAsync(cancellationToken);
+        }
+
+        return game;
     }
 
     public async Task<SpeedTypingGame?> GetByLobbyIdAsync(Guid lobbyId, CancellationToken cancellationToken = default)
     {
-        return await _context.SpeedTypingGames
+        var game = await _context.SpeedTypingGames
             .Include(g => g.Text)
             .FirstOrDefaultAsync(g => g.LobbyId == lobbyId, cancellationToken);
+
+        if (game != null)
+        {
+            await _context.Entry(game).Collection(g => g.PlayerProgresses).LoadAsync(cancellationToken);
+            await _context.Entry(game).Collection(g => g.Results).LoadAsync(cancellationToken);
+        }
+
+        return game;
     }
 
     public async Task UpdateAsync(SpeedTypingGame game, CancellationToken cancellationToken = default)
