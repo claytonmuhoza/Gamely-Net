@@ -120,6 +120,10 @@ export function LobbyListPage() {
                     { const morpionGame = await useCases.morpion.start.execute(lobby.id);
                     navigate(`/morpion/${morpionGame.id}`);
                     break; }
+                case 1: // Puissance4
+                    { const puissanceGame = await useCases.puissance.start.execute(lobby.id);
+                    navigate(`/puissance4/${puissanceGame.id}`);
+                    break; }
                 default:
                     setError("Ce jeu n'est pas encore implémenté");
             }

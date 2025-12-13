@@ -16,9 +16,8 @@ export const router = createBrowserRouter([
             { path: "jeux", element: <GamesListPage /> },
             { path: "lobbies", element: <LobbyListPage /> },
             { path: "morpion/:gameId", element: <MorpionGamePage /> },
-            { path: "speedtyping/:gameId", element: <SpeedTypingGamePage /> }
-            { path: "puissance/:gameId", element: <PuissanceGamePage /> }
-
+            { path: "speedtyping/:gameId", element: <SpeedTypingGamePage /> },
+            { path: "puissance4/:gameId", element: <PuissanceGamePage /> }
         ]
     }
 ]);

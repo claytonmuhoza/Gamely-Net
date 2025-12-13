@@ -1,31 +1,31 @@
-import * as signalR from "@microsoft/signalr";
+// typescript
+import * as SignalR from "@microsoft/signalr";
 import { createSignalRConnection } from "../signalRConnectionFactory";
-
-import { PuissanceGame } from "../../../domain/puissance/puissance";
+import { PuissanceGame } from '../../../domain/puissance/puissance';
+import * as signalR from "@microsoft/signalr";
 
 interface PuissanceGameDto {
     id: string;
     lobbyId: string;
     board: string;
-    playerOneId: string;
-    playerTwoId: string;
+    playerRedId: string;
+    playerYellowId: string;
     currentPlayerId: string;
     winnerPlayerId?: string | null;
     isFinished: boolean;
     isDraw: boolean;
 }
-
 type GameUpdatedHandler = (game: PuissanceGame) => void;
-type ErrorHandler = (error: Error) => void;
+type ErrorHandler = (error: any) => void;
 
 export class PuissanceSignalRClient {
-    private connection: signalR.HubConnection;
+    private connection: SignalR.HubConnection;
     private gameUpdatedHandlers: GameUpdatedHandler[] = [];
     private errorHandlers: ErrorHandler[] = [];
     private handlersRegistered = false;
 
     constructor() {
-        this.connection = createSignalRConnection("/hubs/puissance");
+        this.connection = createSignalRConnection('/hubs/puissance');
     }
 
     private map(dto: PuissanceGameDto): PuissanceGame {
@@ -33,8 +33,8 @@ export class PuissanceSignalRClient {
             dto.id,
             dto.lobbyId,
             dto.board,
-            dto.playerOneId,
-            dto.playerTwoId,
+            dto.playerRedId,
+            dto.playerYellowId,
             dto.currentPlayerId,
             dto.winnerPlayerId ?? null,
             dto.isFinished,
@@ -42,13 +42,13 @@ export class PuissanceSignalRClient {
         );
     }
 
-    onGameUpdated(handler: GameUpdatedHandler) {
+   onGameUpdated(handler: GameUpdatedHandler) {
         this.gameUpdatedHandlers.push(handler);
-    }
+   }
 
-    onError(handler: ErrorHandler) {
+   onError(handler: ErrorHandler) {
         this.errorHandlers.push(handler);
-    }
+   }
 
     private registerHandlers() {
         if (this.handlersRegistered) return;
@@ -66,51 +66,47 @@ export class PuissanceSignalRClient {
             this.gameUpdatedHandlers.forEach((h) => h(game));
         });
 
-        this.connection.on("Error", (message: string) => {
-            const error = new Error(message);
-            this.errorHandlers.forEach((h) => h(error));
+        this.connection.on("Error", (err) => {
+            console.error("[PuissanceSignalR] Error event", err);
+            this.errorHandlers.forEach((h) => h(err));
         });
     }
 
-    async start() {
-        if (this.connection.state === signalR.HubConnectionState.Disconnected ) {
-            this.registerHandlers();
-            try{
-                await this.connection.start();
-                console.log("[PuissanceSignalR] Connexion démarrée");
-            }catch (e) {
-                console.error("[PuissanceSignalR] Erreur de connexion", e);
-                throw e;
-            }
-
+    async start(): Promise<void> {
+        if (
+            this.connection.state === signalR.HubConnectionState.Connected ||
+            this.connection.state === signalR.HubConnectionState.Connecting
+        ) {
+            return;
         }
-    }
 
-    async stop() {
-        if (this.connection.state === signalR.HubConnectionState.Connected) {
-            await this.connection.stop();
-            console.log("[PuissanceSignalR] Connexion arrêtée");
-        }
-    }
+        this.registerHandlers();
 
-    async joinGame(gameId: string, playerId: string) {
-        await this.start();
         try {
-            await this.connection.invoke("JoinGame", gameId, playerId);
-            console.log("[PuissanceSignalR] Rejoint le jeu", gameId);
-        } catch (e) {
-            console.error("[PuissanceSignalR] Erreur en rejoignant le jeu", e);
-            throw e;
+            await this.connection.start();
+            console.log("[PuissanceSignalR] Connection started");
+        } catch (err) {
+            console.error("[PuissanceSignalR] Failed to start", err);
+            this.errorHandlers.forEach((h) => h(err as Error));
+            throw err;
         }
     }
+    
+    async stop(): Promise<void> {
+        if (this.connection.state === signalR.HubConnectionState.Disconnected) return;
+        await this.connection.stop();
+    }
 
-    async playMove(gameId: string, playerId: string, columnIndex: number) {
-        try {
-            await this.connection.invoke("PlayMove", gameId, playerId, columnIndex);
-            console.log("[PuissanceSignalR] Move joué", { gameId, playerId, columnIndex });
-        } catch (e) {
-            console.error("[PuissanceSignalR] Erreur en jouant le move", e);
-            throw e;
-        }
+    async joinGame(gameId: string, playerId: string): Promise<void> {
+        //await this.start();
+        console.log("[PuissanceSignalR] JoinGame invoke", gameId, playerId);
+        await this.connection.invoke("JoinGame", gameId, playerId);
+    }
+
+    async playMove(gameId: string, playerId: string, column: number): Promise<void> {
+
+        //await this.start();
+        console.log("[PuissanceSignalR] PlayMove invoke", gameId, playerId,column );
+        await this.connection.invoke("PlayMove", gameId, playerId,column);
     }
 }

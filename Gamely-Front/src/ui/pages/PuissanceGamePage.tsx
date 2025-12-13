@@ -100,29 +100,13 @@ export default function PuissanceGamePage() {
         if (!gameInstance || !gameId || !player) return;
 
         const client = signalRClientRef.current;
+        if(!client) return;
         try {
             setPlaying(true);
             setError(null);
-
-            if (client?.playMove) {
-                // si un client SignalR est disponible
-                await client.playMove(gameId, player.id, columnIndex);
-                // on attend l'évènement de mise à jour
-                return;
-            }
-
-            // Fallback : appeler le useCase REST si disponible
-            if ((useCases as any).puissance?.play?.execute) {
-                const updated = await (useCases as any).puissance.play.execute({
-                    gameId,
-                    playerId: player.id,
-                    columnIndex
-                });
-                if (updated) setGameInstance(updated as GameInstance);
-            } else {
-                // Aucun back-end connecté : log et mise à jour locale minimale
-                console.log(`Play fallback: column ${columnIndex}`);
-            }
+            console.log(client);
+            // si un client SignalR est disponible
+            await client.playMove(gameId, player.id, columnIndex);
         } catch (err) {
             console.error(err);
             setError('Erreur lors du coup (temps réel)');
