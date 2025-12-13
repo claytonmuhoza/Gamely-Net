@@ -47,9 +47,6 @@ export function LobbyListPage() {
 
     useEffect(() => {
         loadLobbies();
-        // Auto-refresh every 5 seconds
-        const interval = setInterval(loadLobbies, 5000);
-        return () => clearInterval(interval);
     }, []);
 
     const handleCreateLobby = async (data: {
@@ -113,13 +110,17 @@ export function LobbyListPage() {
             // Start game based on game type
             switch (lobby.gameType) {
                 case 0: // SpeedTyping
-                    { const speedTypingGame = await useCases.speedtyping.start.execute(lobby.id);
+                {
+                    const speedTypingGame = await useCases.speedTyping.start.execute(lobby.id);
                     navigate(`/speedtyping/${speedTypingGame.id}`);
-                    break; }
+                    break;
+                }
                 case 2: // Morpion
-                    { const morpionGame = await useCases.morpion.start.execute(lobby.id);
+                {
+                    const morpionGame = await useCases.morpion.start.execute(lobby.id);
                     navigate(`/morpion/${morpionGame.id}`);
-                    break; }
+                    break;
+                }
                 default:
                     setError("Ce jeu n'est pas encore implémenté");
             }

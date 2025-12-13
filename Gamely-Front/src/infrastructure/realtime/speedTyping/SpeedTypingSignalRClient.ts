@@ -1,14 +1,27 @@
-
 import * as signalR from "@microsoft/signalr";
 import { createSignalRConnection } from "../signalRConnectionFactory";
-import { SpeedTypingGame } from "../../../domain/speedtyping/speedtyping";
+import { SpeedTypingGame } from "../../../domain/speedTyping/speedTyping";
+
+interface SpeedTypingGameDto {
+    id: string;
+    lobbyId: string;
+    text: any;
+    status: string;
+    startedAt: string | null;
+    finishedAt: string | null;
+    durationSeconds: number;
+    playerProgresses: any[];
+    results: any[];
+}
 
 type GameUpdatedHandler = (game: SpeedTypingGame) => void;
-type ErrorHandler = (error: any) => void;
+type GameStartedHandler = (game: SpeedTypingGame) => void;
+type ErrorHandler = (error: Error) => void;
 
 export class SpeedTypingSignalRClient {
     private connection: signalR.HubConnection;
     private gameUpdatedHandlers: GameUpdatedHandler[] = [];
+    private gameStartedHandlers: GameStartedHandler[] = [];
     private errorHandlers: ErrorHandler[] = [];
     private handlersRegistered = false;
 
@@ -16,8 +29,16 @@ export class SpeedTypingSignalRClient {
         this.connection = createSignalRConnection("/hubs/speedtyping");
     }
 
+    private map(dto: SpeedTypingGameDto): SpeedTypingGame {
+        return SpeedTypingGame.fromDto(dto);
+    }
+
     onGameUpdated(handler: GameUpdatedHandler) {
         this.gameUpdatedHandlers.push(handler);
+    }
+
+    onGameStarted(handler: GameStartedHandler) {
+        this.gameStartedHandlers.push(handler);
     }
 
     onError(handler: ErrorHandler) {
@@ -28,21 +49,23 @@ export class SpeedTypingSignalRClient {
         if (this.handlersRegistered) return;
         this.handlersRegistered = true;
 
-        this.connection.on("GameUpdated", (dto: any) => {
+        this.connection.on("GameUpdated", (dto: SpeedTypingGameDto) => {
             console.log("[SpeedTypingSignalR] GameUpdated reçu", dto);
-            const game = SpeedTypingGame.fromDto(dto);
+            const game = this.map(dto);
             this.gameUpdatedHandlers.forEach((h) => h(game));
         });
 
-        this.connection.on("GameState", (dto: any) => {
-            console.log("[SpeedTypingSignalR] GameState reçu", dto);
-            const game = SpeedTypingGame.fromDto(dto);
-            this.gameUpdatedHandlers.forEach((h) => h(game));
-        });
-
-        this.connection.on("GameStarted", (dto: any) => {
+        this.connection.on("GameStarted", (dto: SpeedTypingGameDto) => {
             console.log("[SpeedTypingSignalR] GameStarted reçu", dto);
-            const game = SpeedTypingGame.fromDto(dto);
+            const game = this.map(dto);
+            this.gameStartedHandlers.forEach((h) => h(game));
+            // Notifier aussi les handlers de mise à jour
+            this.gameUpdatedHandlers.forEach((h) => h(game));
+        });
+
+        this.connection.on("GameState", (dto: SpeedTypingGameDto) => {
+            console.log("[SpeedTypingSignalR] GameState reçu", dto);
+            const game = this.map(dto);
             this.gameUpdatedHandlers.forEach((h) => h(game));
         });
 
@@ -91,6 +114,7 @@ export class SpeedTypingSignalRClient {
 
     async updateProgress(gameId: string, playerId: string, typedText: string): Promise<void> {
         await this.start();
+        console.log("[SpeedTypingSignalR] UpdateProgress invoke", gameId, playerId, typedText.length);
         await this.connection.invoke("UpdateProgress", gameId, playerId, typedText);
     }
 }
