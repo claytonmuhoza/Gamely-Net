@@ -48,9 +48,8 @@ builder.Services.AddScoped<IPuissanceGameRepository,PuissanceGameRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ILobbyService, LobbyService>();
 builder.Services.AddScoped<IMorpionGameService, MorpionGameService>();
-builder.Services.AddScoped<IMorpionGameService, MorpionGameService>();
 builder.Services.AddScoped<ISpeedTypingGameService, SpeedTypingGameService>();
-
+builder.Services.AddScoped<IPuissanceGameService, PuissanceGameService>(); 
 // SignalR
 builder.Services.AddSignalR();
 

@@ -1,6 +1,7 @@
 ﻿using GamePlatform.Application.Interfaces.Repositories;
 using GamePlatform.Application.Interfaces.Services;
 using GamePlatforme.domain.Entities;
+using GamePlatforme.domain.Enums;
 
 
 namespace GamePlatform.Application.Puissance;
@@ -15,67 +16,64 @@ public class PuissanceGameService : IPuissanceGameService
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _lobbyRepository = lobbyRepository ?? throw new ArgumentNullException(nameof(lobbyRepository));
     }
-
-
-    public async Task<PuissanceGame> CreateAsync(Guid lobbyId, Guid player1Id, Guid player2Id,
+    
+    public async Task<PuissanceGameDto> StrartGameAsync(StartPuissanceGameCommande command,
         CancellationToken cancellationToken = default)
     {
-        var game = new PuissanceGame(lobbyId, player1Id, player2Id);
-        return await _repository.AddAsync(game, cancellationToken).ConfigureAwait(false);
+        if (command.LobbyId == Guid.Empty)
+            throw new ArgumentException("LobbyId is required", nameof(command.LobbyId));
+        
+        var lobby = await _lobbyRepository.GetByIdAsync(command.LobbyId, cancellationToken)
+                    ?? throw new InvalidOperationException("Lobby not found");
+        
+        if(lobby.GameType != GameType.Puissance4)
+            throw new InvalidOperationException("Lobby is not a Puissance4 lobby");
+        
+        if (lobby.PlayerIds.Count != 2)
+            throw new InvalidOperationException("Puissance requires exactly 2 players");
+        
+        var hostPlayerId = lobby.PlayerIds.ToList()[0];
+        var otherPlayerId = lobby.PlayerIds.ToList()[1];
+        
+        
+        var game = new PuissanceGame(lobby.Id, hostPlayerId, otherPlayerId);
+        game = await _repository.AddAsync(game, cancellationToken);
+        return Map(game);
     }
-
-    public async Task<PuissanceGame?> GetByIdAsync(Guid gameId, CancellationToken cancellationToken = default)
-    {
-        return await _repository.GetByIdAsync(gameId, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task JoinAsync(Guid gameId, Guid playerId, CancellationToken cancellationToken = default)
-    {
-        var game = await EnsureGameExists(gameId, cancellationToken).ConfigureAwait(false);
-        game.Join(playerId);
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task LeaveAsync(Guid gameId, Guid playerId, CancellationToken cancellationToken = default)
-    {
-        var game = await EnsureGameExists(gameId, cancellationToken).ConfigureAwait(false);
-        game.Leave(playerId);
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task SetPrivacyAsync(Guid gameId, bool isPrivate, string? password,
+    
+    public async Task<PuissanceGameDto> PlayMoveAsync(PlayPuissanceGameCommande command,
         CancellationToken cancellationToken = default)
     {
-        var game = await EnsureGameExists(gameId, cancellationToken).ConfigureAwait(false);
-        game.SetPrivacy(isPrivate, password);
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+        if (command.GameId == Guid.Empty)
+            throw new ArgumentException("GameId is required", nameof(command.GameId));
+
+        var game = await _repository.GetByIdAsync(command.GameId, cancellationToken)
+                   ?? throw new InvalidOperationException("Game not found");
+
+        game.PlayMove(command.PlayerId, command.Column);
+
+        await _repository.UpdateAsync(game, cancellationToken);
+
+        return Map(game);
+    }
+    
+    public async Task<PuissanceGameDto?> GetByIdAsync(Guid gameId, CancellationToken cancellationToken = default)
+    {
+        var game = await _repository.GetByIdAsync(gameId, cancellationToken);
+        if (game == null) return null;
+        return Map(game);
     }
 
-    public async Task PlayMoveAsync(Guid gameId, Guid playerId, int column,
-        CancellationToken cancellationToken = default)
+    private static PuissanceGameDto Map(PuissanceGame game)
     {
-        var game = await EnsureGameExists(gameId, cancellationToken).ConfigureAwait(false);
-        game.PlayMove(playerId, column);
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task<bool> CheckPasswordAsync(Guid gameId, string? password,
-        CancellationToken cancellationToken = default)
-    {
-        var game = await EnsureGameExists(gameId, cancellationToken).ConfigureAwait(false);
-        return game.CheckPassword(password);
-    }
-
-    public async Task SaveAsync(PuissanceGame game, CancellationToken cancellationToken = default)
-    {
-        if (game == null) throw new ArgumentNullException(nameof(game));
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task<PuissanceGame> EnsureGameExists(Guid gameId, CancellationToken cancellationToken)
-    {
-        var game = await _repository.GetByIdAsync(gameId, cancellationToken).ConfigureAwait(false);
-        if (game == null) throw new InvalidOperationException($"Game not found: {gameId}");
-        return game;
+        return new PuissanceGameDto
+        {
+            Id = game.Id,
+            LobbyId = game.LobbyId,
+            Player1Id = game.Player1Id,
+            Player2Id = game.Player2Id,
+            CurrentPlayerId = game.CurrentPlayerId,
+            Board = game.Board,
+        };
     }
 }

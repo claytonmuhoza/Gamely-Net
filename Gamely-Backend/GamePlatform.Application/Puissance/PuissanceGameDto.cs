@@ -11,23 +11,35 @@ public class PuissanceGameDto
     public Guid? Player2Id { get; init; }
     public Guid? CurrentPlayerId { get; init; }
     public Guid? WinnerId { get; init; }
+    
 
-    // Indique si la partie est privée (le mot de passe n'est pas exposé ici)
-    public bool IsPrivate { get; init; }
-    public bool HasPassword { get; init; }
+    // Représentation plate (string) du plateau : '.' = vide, 'R'/'Y' ou 'r'/'y'
+    // Longueur attendue pour 7x7 = 49
+    public string Board { get; init; } = new('.', 7 * 7);
 
-    // Représentation ligne par ligne du plateau :
-    // 0 = case vide, 1 = pion joueur1, 2 = pion joueur2 (convention)
-    public int[][] Board { get; init; } = Array.Empty<int[]>();
+    // Tentative de déduction des dimensions : si la longueur est un carré parfait on l'utilise,
+    // sinon on retourne la taille par défaut 7x7.
+    public int Rows
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Board)) return 0;
+            var len = Board.Length;
+            var root = (int)Math.Sqrt(len);
+            return root * root == len ? root : 7;
+        }
+    }
 
-    // Dimensions pratiques (peuvent être redondantes par rapport à Board)
-    public int Rows => Board?.Length ?? 0;
-    public int Columns => (Board != null && Board.Length > 0) ? Board[0].Length : 0;
+    public int Columns
+    {
+        get
+        {
+            var rows = Rows;
+            return rows > 0 ? Board.Length / rows : 0;
+        }
+    }
 
-    // Statut lisible (ex: "Waiting", "InProgress", "Finished")
     public string Status { get; init; } = string.Empty;
-
-    // Horodatage optionnel
     public DateTime? CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
 
@@ -42,7 +54,7 @@ public class PuissanceGameDto
         Guid? winnerId,
         bool isPrivate,
         bool hasPassword,
-        int[][] board,
+        string board,
         string status = "",
         DateTime? createdAt = null,
         DateTime? updatedAt = null)
@@ -53,9 +65,7 @@ public class PuissanceGameDto
         Player2Id = player2Id;
         CurrentPlayerId = currentPlayerId;
         WinnerId = winnerId;
-        IsPrivate = isPrivate;
-        HasPassword = hasPassword;
-        Board = board ?? Array.Empty<int[]>();
+        Board = board ?? new('.', 7*7);
         Status = status ?? string.Empty;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;

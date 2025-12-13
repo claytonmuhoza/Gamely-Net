@@ -46,48 +46,7 @@ public class PuissanceGame
 
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
-    // --- Actions publiques ---
-    public void SetPrivacy(bool isPrivate, string? password)
-    {
-        if (isPrivate && string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("Password is required for private games", nameof(password));
-
-        IsPrivate = isPrivate;
-        Password = isPrivate ? password : null;
-    }
-
-    public void Join(Guid playerId)
-    {
-        if (playerId == Guid.Empty) throw new ArgumentException("Invalid player id", nameof(playerId));
-        if (playerId == Player1Id || playerId == Player2Id) return;
-
-        if (Player1Id == Guid.Empty) Player1Id = playerId;
-        else if (Player2Id == Guid.Empty) Player2Id = playerId;
-        else throw new InvalidOperationException("Both player slots are already taken");
-    }
-
-    public void Leave(Guid playerId)
-    {
-        if (playerId == Guid.Empty) return;
-        if (IsFinished) return;
-
-        if (playerId == Player1Id)
-        {
-            Player1Id = Guid.Empty;
-            if (Player2Id != Guid.Empty)
-                Finish(Player2Id);
-            else
-                Finish(null, true);
-        }
-        else if (playerId == Player2Id)
-        {
-            Player2Id = Guid.Empty;
-            if (Player1Id != Guid.Empty)
-                Finish(Player1Id);
-            else
-                Finish(null, true);
-        }
-    }
+    
 
     // column : 0..Cols-1
     public void PlayMove(Guid playerId, int column)
