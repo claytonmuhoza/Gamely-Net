@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GamePlatform.Application\GamePlatform.Application.csproj" />
+      <ProjectReference Include="..\GamePlatform.Contracts\GamePlatform.Contracts.csproj" />
+      <ProjectReference Include="..\GamePlatform.Infrastructure\GamePlatform.Infrastructure.csproj" />
+      <ProjectReference Include="..\GamePlatform.Persistence\GamePlatform.Persistence.csproj" />
+    </ItemGroup>
+
+</Project>

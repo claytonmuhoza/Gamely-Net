@@ -1,0 +1,83 @@
+# =========================
+# .NET / Visual Studio / Rider
+# =========================
+
+## Build results
+**/[Bb]in/
+**/[Oo]bj/
+**/[Ll]og/
+**/[Ll]ogs/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.rsuser
+*.userprefs
+
+## Visual Studio
+.vs/
+TestResults/
+*.VC.db
+*.VC.VC.opendb
+*.pdb
+*.cache
+
+## JetBrains Rider / IntelliJ
+.idea/
+*.sln.iml
+*.DotSettings.user
+_ReSharper*/
+*.resharper
+*.ncrunch*
+*.DotCover
+
+## MSBuild / NuGet
+**/packages/
+.nuget/
+*.nupkg
+*.snupkg
+**/project.assets.json
+**/project.nuget.cache
+
+## ASP.NET Core
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json.example
+!appsettings.Production.json.example
+
+## Environment / secrets
+.env
+.env.*
+secrets.json
+
+## EF Core
+**/Migrations/
+
+## Publish
+**/[Pp]ublish/
+**/publish/
+
+## Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+## OS / temp
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.swp
+
+## Docker overrides (optionnel)
+docker-compose.override.yml
+
+## SQL Server / local db files (optionnel)
+*.mdf
+*.ldf
+
+## Node/Front (si jamais le repo contient aussi le front)
+node_modules/
+dist/
+.vite/
