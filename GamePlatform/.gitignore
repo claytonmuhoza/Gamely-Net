@@ -41,7 +41,7 @@ _ReSharper*/
 ## ASP.NET Core
 appsettings.*.json
 !appsettings.json
-!appsettings.Development.json.example
+!appsettings.Development.json
 !appsettings.Production.json.example
 
 ## Environment / secrets
