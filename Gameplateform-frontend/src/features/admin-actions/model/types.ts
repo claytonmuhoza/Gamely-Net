@@ -8,3 +8,14 @@ export type GameActionLogDto = {
     actorClientId: string | null
     at: string // ISO
 }
+
+export type LobbyListItemDto = {
+    lobbyId: string
+    gameId: string
+    status: string
+    isPrivate: boolean
+    playersCount: number
+    createdAt: string
+    hostPseudo: string
+}
+

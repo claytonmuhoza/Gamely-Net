@@ -1,27 +1,15 @@
-import {
-    Alert,
-    Button,
-    Card,
-    CardContent,
-    Chip,
-    Stack,
-    Typography,
-    Grid,
-    Box,
-    Paper,
-    Skeleton
-} from '@mui/material'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Add, People, Lock, LockOpen, SportsEsports } from '@mui/icons-material'
-import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../../shared/api/http'
-import { getOrCreateClientId } from '../../../shared/session/clientId'
-import { getPseudo } from '../../../shared/session/pseudo'
-import { createLobby, listWaitingLobbies } from '../api/lobbiesApi'
-import { useLobbyListRealtime } from '../realtime/useLobbyListRealtime'
-import type { LobbyListItemDto } from '../model/types'
-import { CreateLobbyDialog, type CreateLobbyForm } from './CreateLobbyDialog'
+import {Alert, Box, Button, Card, CardContent, Chip, Grid, Paper, Skeleton, Stack, Typography} from '@mui/material'
+import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {Add, Lock, LockOpen, People, SportsEsports} from '@mui/icons-material'
+import {useTranslation} from 'react-i18next'
+import {getErrorMessage} from '../../../shared/api/http'
+import {getOrCreateClientId} from '../../../shared/session/clientId'
+import {getPseudo} from '../../../shared/session/pseudo'
+import {createLobby, listWaitingLobbies} from '../api/lobbiesApi'
+import {useLobbyListRealtime} from '../realtime/useLobbyListRealtime'
+import type {LobbyListItemDto} from '../model/types'
+import {CreateLobbyDialog, type CreateLobbyForm} from './CreateLobbyDialog'
 
 const gameIcons: Record<string, string> = {
     Morpion: '⚔️',
@@ -30,7 +18,7 @@ const gameIcons: Record<string, string> = {
 }
 
 export function LobbyListPage() {
-    const { t } = useTranslation()
+    const {t} = useTranslation()
     const nav = useNavigate()
     const pseudo = getPseudo()
     const clientId = getOrCreateClientId()
@@ -39,7 +27,7 @@ export function LobbyListPage() {
     const [error, setError] = useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
-    const { lobbies, setLobbies } = useLobbyListRealtime([])
+    const {lobbies, setLobbies} = useLobbyListRealtime([])
 
     useEffect(() => {
         if (!pseudo) {
@@ -88,19 +76,19 @@ export function LobbyListPage() {
                     sx={{
                         fontWeight: 800,
                         mb: 1,
-                        fontSize: { xs: '2rem', md: '3rem' }
+                        fontSize: {xs: '2rem', md: '3rem'}
                     }}
                 >
                     {t('welcome.title')}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                <Typography variant="body1" color="text.secondary" sx={{mb: 3}}>
                     {t('welcome.subtitle')}
                 </Typography>
 
                 <Button
                     variant="contained"
                     size="large"
-                    startIcon={<Add />}
+                    startIcon={<Add/>}
                     onClick={() => setDialogOpen(true)}
                     sx={{
                         borderRadius: 2,
@@ -118,7 +106,7 @@ export function LobbyListPage() {
             {error && (
                 <Alert
                     severity="error"
-                    sx={{ borderRadius: 2 }}
+                    sx={{borderRadius: 2}}
                     onClose={() => setError(null)}
                 >
                     {error}
@@ -127,27 +115,28 @@ export function LobbyListPage() {
 
             {/* Lobbies Section */}
             <Box>
-                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                    <SportsEsports sx={{ color: 'text.secondary' }} />
-                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{mb: 2}}>
+                    <SportsEsports sx={{color: 'text.secondary'}}/>
+                    <Typography variant="h5" sx={{fontWeight: 700}}>
                         {t('lobby.title')}
                     </Typography>
                     <Chip
                         label={loading ? '...' : lobbies.length}
                         size="small"
-                        sx={{ fontWeight: 600 }}
+                        sx={{fontWeight: 600}}
                     />
                 </Stack>
 
                 {loading ? (
                     <Grid container spacing={2}>
                         {[1, 2, 3].map((i) => (
-                            <Grid item xs={12} sm={6} md={4} key={i}>
-                                <Card sx={{ borderRadius: 3 }}>
+                            <Grid size={{xs: 12, sm: 6, md: 4}} key={i}>
+                                <Card sx={{borderRadius: 3}}>
                                     <CardContent>
-                                        <Skeleton variant="text" width="60%" height={32} />
-                                        <Skeleton variant="text" width="40%" />
-                                        <Skeleton variant="rectangular" width="100%" height={40} sx={{ mt: 2, borderRadius: 2 }} />
+                                        <Skeleton variant="text" width="60%" height={32}/>
+                                        <Skeleton variant="text" width="40%"/>
+                                        <Skeleton variant="rectangular" width="100%" height={40}
+                                                  sx={{mt: 2, borderRadius: 2}}/>
                                     </CardContent>
                                 </Card>
                             </Grid>
@@ -164,8 +153,8 @@ export function LobbyListPage() {
                             bgcolor: 'background.paper'
                         }}
                     >
-                        <SportsEsports sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                        <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                        <SportsEsports sx={{fontSize: 64, color: 'text.disabled', mb: 2}}/>
+                        <Typography variant="h6" color="text.secondary" sx={{mb: 1}}>
                             {t('lobby.noLobbies')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -175,7 +164,7 @@ export function LobbyListPage() {
                 ) : (
                     <Grid container spacing={2}>
                         {lobbies.map((lobby: LobbyListItemDto) => (
-                            <Grid item xs={12} sm={6} md={4} key={lobby.lobbyId}>
+                            <Grid size={{xs: 12, sm: 6, md: 4}} key={lobby.lobbyId}>
                                 <Card
                                     sx={{
                                         borderRadius: 3,
@@ -190,10 +179,12 @@ export function LobbyListPage() {
                                 >
                                     <CardContent>
                                         <Stack spacing={2}>
-                                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                                            <Stack direction="row" justifyContent="space-between"
+                                                   alignItems="flex-start">
                                                 <Box>
-                                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-                                                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                                                    <Stack direction="row" spacing={1} alignItems="center"
+                                                           sx={{mb: 0.5}}>
+                                                        <Typography variant="h6" sx={{fontWeight: 700}}>
                                                             {gameIcons[lobby.gameId]} {lobby.gameId}
                                                         </Typography>
                                                     </Stack>
@@ -203,16 +194,16 @@ export function LobbyListPage() {
                                                 </Box>
 
                                                 {lobby.isPrivate ? (
-                                                    <Lock fontSize="small" color="action" />
+                                                    <Lock fontSize="small" color="action"/>
                                                 ) : (
-                                                    <LockOpen fontSize="small" color="action" />
+                                                    <LockOpen fontSize="small" color="action"/>
                                                 )}
                                             </Stack>
 
                                             <Stack direction="row" spacing={1} alignItems="center">
-                                                <People fontSize="small" color="action" />
+                                                <People fontSize="small" color="action"/>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {t('lobby.players', { count: lobby.playersCount })}
+                                                    {t('lobby.players', {count: lobby.playersCount})}
                                                 </Typography>
                                             </Stack>
 

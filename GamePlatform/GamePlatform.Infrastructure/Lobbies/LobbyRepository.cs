@@ -36,4 +36,11 @@ public sealed class LobbyRepository : ILobbyRepository
         _db.Lobbies.Remove(lobby);
         return Task.CompletedTask;
     }
+    
+    public Task<List<Lobby>> GetAllAsync(CancellationToken ct)
+        => _db.Lobbies
+            .ToListAsync(ct);
+
+
+    
 }

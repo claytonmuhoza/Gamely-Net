@@ -14,7 +14,13 @@
     "search": "Search",
     "filter": "Filter",
     "copied": "Copied!",
-    "characters": "characters"
+    "characters": "characters",
+    "actions": "actions",
+    "view": "more",
+    "refresh": "Refresh",
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDescription": "The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to Home"
   },
   "nav": {
     "home": "Home",
@@ -36,7 +42,7 @@
     "createLobby": "Create lobby",
     "noLobbies": "No lobbies available",
     "beFirst": "Be the first to create a lobby!",
-    "players": "{{count}} player",
+    "players": "player",
     "players_plural": "{{count}} players",
     "playersCount": "Players ({{count}})",
     "by": "by",
@@ -54,7 +60,8 @@
     "lobbyIdCopied": "Copied!",
     "lobbyId": "Lobby ID",
     "joinGame": "Join game",
-    "quitGame": "Quit"
+    "quitGame": "Quit",
+    "status": "status"
   },
   "games": {
     "chooseGame": "Choose a game",
@@ -145,7 +152,15 @@
     "action": "Action",
     "actor": "Actor",
     "summary": "Summary",
-    "payload": "Payload"
+    "payload": "Payload",
+    "searchLobby": "Search lobby by ID",
+    "invalidLobbyId": "Invalid Lobby ID",
+    "searchLobbyPlaceholder": "Enter a valid Lobby ID",
+    "noLobbies": "No lobbies found.",
+    "noLobbiesDescription": "Try changing the Lobby ID or make sure a game has been played.",
+    "lobbyDetails": "Lobby Details"
+
+
   },
   "welcome": {
     "title": "Welcome to GameHub",
