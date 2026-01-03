@@ -15,6 +15,7 @@ public static class DependencyInjection
     {
         services.AddScoped<CreateLobbyHandler>();
         services.AddScoped<ListWaitingLobbiesHandler>();
+        services.AddScoped<GetAllLobbyHandler>();
         services.AddScoped<GetLobbyDetailsHandler>();
         services.AddScoped<JoinLobbyHandler>();
         services.AddScoped<LeaveLobbyHandler>();

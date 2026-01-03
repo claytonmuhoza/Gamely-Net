@@ -11,4 +11,6 @@ public interface ILobbyRepository
 
     Task SaveChangesAsync(CancellationToken ct);
     Task RemoveAsync(Lobby lobby, CancellationToken ct);
+    
+    Task<List<Lobby>> GetAllAsync(CancellationToken ct);
 }

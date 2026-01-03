@@ -26,6 +26,12 @@ public sealed class LobbiesController : ControllerBase
         [FromServices] ListWaitingLobbiesHandler handler,
         CancellationToken ct)
         => Ok(await handler.Handle(ct));
+    
+    [HttpGet("all")]
+    public async Task<ActionResult<List<LobbyListItemDto>>> GetAllLobby(
+        [FromServices] GetAllLobbyHandler handler,
+        CancellationToken ct)
+        => Ok(await handler.Handle(ct));
 
     [HttpGet("{lobbyId:guid}")]
     public async Task<ActionResult<LobbyDetailsDto>> Get(
