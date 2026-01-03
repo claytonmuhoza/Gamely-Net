@@ -6,6 +6,7 @@ import { GamePage } from '../features/games/shared/GamePage'
 import { EnterPseudoPage } from '../features/lobbies/ui/EnterPseudoPage'
 import { ScoresPage } from '../features/scores/ui/ScoresPage'
 import { GameActionsPage } from '../features/admin-actions/ui/GameActionsPage'
+import { NotFoundPage } from './layout/NotFoundPage'
 
 
 export const router = createBrowserRouter([
@@ -19,7 +20,8 @@ export const router = createBrowserRouter([
             { path: 'games/:lobbyId', element: <GamePage /> },
             { path: '/scores', element: <ScoresPage /> },
             {path:'/admin/actions', element: <GameActionsPage/>},
-            {path:"/admin/actions/:lobbyId", element:<GameActionsPage /> }
+            {path:"/admin/actions/:lobbyId", element:<GameActionsPage /> },
+            { path: '*', element: <NotFoundPage />}
         ]
     }
 ])

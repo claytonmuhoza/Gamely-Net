@@ -17,7 +17,11 @@
     "characters": "caractères",
     "actions": "actions",
     "view": "Voir",
-    "refresh": "Rafraîchir"
+    "refresh": "Rafraîchir",
+
+    "pageNotFound": "Page introuvable",
+    "pageNotFoundDescription": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
   },
   "nav": {
     "home": "Accueil",
@@ -39,9 +43,9 @@
     "createLobby": "Créer le lobby",
     "noLobbies": "Aucun lobby disponible",
     "beFirst": "Soyez le premier à créer un lobby !",
-    "players": "{{count}} joueur",
-    "players_plural": "{{count}} joueurs",
-    "playersCount": "Joueurs ({{count}})",
+    "players": " joueur",
+    "players_plural": "joueurs",
+    "playersCount": "Joueurs",
     "by": "par",
     "private": "Privé",
     "public": "Public",
