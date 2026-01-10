@@ -43,6 +43,9 @@ public sealed class UpdateSpeedTypingProgressHandler
         if (session.GameId != GameId.SpeedTyping)
             throw new InvalidOperationException("Not a SpeedTyping game");
 
+        if (session.Phase != GamePhase.Running)
+            return; // idempotent: si déjà fini, on ignore
+
         var lobby = await _lobbies.GetByIdAsync(lobbyId, ct)
             ?? throw new KeyNotFoundException("Lobby not found");
 
@@ -58,11 +61,15 @@ public sealed class UpdateSpeedTypingProgressHandler
             return;
         }
 
+        //  anti-spam
         if (nowMs - runner.LastUpdateUnixMs < snapshot.MinUpdateIntervalMs)
         {
             await _notifier.NotifyCommandRejected(lobbyId, "Too many updates", ct);
             return;
         }
+
+        //  Important : capturer l’état "avant"
+        var wasFinishedBefore = runner.FinishedAtUnixMs is not null;
 
         // Domain
         var race = SpeedTypingMapper.ToDomain(lobbyId, snapshot);
@@ -77,41 +84,55 @@ public sealed class UpdateSpeedTypingProgressHandler
             return;
         }
 
-        // ✅ Mettre à jour l'anti-spam sur le snapshot AVANT save
+        //  mettre à jour anti-spam pour l'acteur
         runner.LastUpdateUnixMs = nowMs;
 
-        // ✅ Mettre à jour snapshot à partir du domain
+        //  réinjecter domain -> snapshot
         foreach (var r in snapshot.Runners)
         {
             var dom = race.Runners.First(x => x.ClientId == r.ClientId);
             r.Progress = dom.Progress;
             r.FinishedAtUnixMs = dom.FinishedAt?.ToUnixTimeMilliseconds();
-            // LastUpdateUnixMs : on garde celui existant (et on a mis celui de l'acteur)
         }
 
-        snapshot.EndedAtUnixMs = race.IsFinished ? nowMs : (long?)null;
+        // transition "vient de finir" (après update domain)
+        var isFinishedNow = runner.FinishedAtUnixMs is not null || req.Progress >= 100;
+        var justFinished = !wasFinishedBefore && isFinishedNow;
 
-        // ✅ Enregistrer score si le joueur vient de finir (détecter la transition)
-        var justFinished = runner.FinishedAtUnixMs is null && race.Runners.First(x => x.ClientId == req.ClientId).FinishedAt is not null;
         if (justFinished)
         {
-            runner.FinishedAtUnixMs = nowMs;
-            var elapsedMs = nowMs - snapshot.StartedAtUnixMs;
+            // force un timestamp propre (au cas où domain ne l’a pas fixé)
+            runner.FinishedAtUnixMs ??= nowMs;
+
+            // score = temps écoulé
+            var elapsedMs = runner.FinishedAtUnixMs.Value - snapshot.StartedAtUnixMs;
 
             await _scores.AddScoreAsync(
-                GameId.SpeedTyping,
-                req.ClientId,
-                runner.Pseudo,
-                elapsedMs,
-                ct);
+                gameId: GameId.SpeedTyping,
+                clientId: req.ClientId,
+                pseudo: runner.Pseudo,
+                value: elapsedMs,
+                lobbyId: lobbyId,
+                gameSessionId: session.Id,
+                ct: ct
+            );
         }
 
-        // Persist state
+        //  règle: dès qu'un joueur termine, la course se termine
+        var raceEnded = snapshot.Runners.Any(r => r.FinishedAtUnixMs is not null);
+        if (raceEnded)
+        {
+            snapshot.EndedAtUnixMs ??= nowMs;
+            session.Phase = GamePhase.Finished;
+            session.EndedAt = DateTimeOffset.UtcNow;
+        }
+
+        // Persist
         session.StateJson = JsonSerializer.Serialize(snapshot, JsonOpts);
         await _sessions.SaveChangesAsync(ct);
 
-        // ✅ Log action (throttle simple) + snapshot
-        if (req.Progress % 5 == 0) // évite de spammer
+        // Logs
+        if (req.Progress % 5 == 0 || justFinished)
         {
             await _actionLogger.LogAsync(
                 session.Id,

@@ -10,14 +10,26 @@ public sealed class ScoreService
 
     public ScoreService(IScoreRepository repo) => _repo = repo;
 
-    public async Task AddScoreAsync(GameId gameId, Guid clientId, string pseudo, long value, CancellationToken ct)
+    public async Task AddScoreAsync(
+        GameId gameId,
+        Guid clientId,
+        string pseudo,
+        long value,
+        Guid? lobbyId,
+        Guid? gameSessionId,
+        CancellationToken ct)
     {
+        if (clientId == Guid.Empty) throw new ArgumentException("clientId is required");
+        if (string.IsNullOrWhiteSpace(pseudo)) throw new ArgumentException("pseudo is required");
+
         var entry = new ScoreEntry
         {
             GameId = gameId,
             ClientId = clientId,
-            Pseudo = pseudo,
+            Pseudo = pseudo.Trim(),
             Value = value,
+            LobbyId = lobbyId,
+            GameSessionId = gameSessionId,
             AchievedAt = DateTimeOffset.UtcNow
         };
 
@@ -27,7 +39,12 @@ public sealed class ScoreService
 
     public async Task<List<ScoreEntryDto>> GetTopAsync(GameId gameId, int limit, CancellationToken ct)
     {
-        var list = await _repo.GetTopAsync(gameId, limit, ct);
+        if (limit <= 0) limit = 10;
+        if (limit > 100) limit = 100;
+
+        var ordering = ScoreRules.OrderingFor(gameId);
+
+        var list = await _repo.GetTopAsync(gameId, limit, ordering, ct);
 
         return list.Select(s => new ScoreEntryDto(
             GameId: s.GameId.ToString(),

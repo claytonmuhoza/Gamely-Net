@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: GamePlatform/GamePlatform.Web/Dockerfile # Ajustez si vous avez mis le Dockerfile ailleurs
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Persistence__Provider=InMemory
+      - Cors__AllowedOrigins__0=http://localhost:5000
+      - Cors__AllowedOrigins__1=http://192.168.41.6:5173
+    ports:
+      - "9040:8080"
+    networks:
+      - gamely-network
+
+  frontend:
+    build:
+      context: ./Gameplateform-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:9040
+    ports:
+      - "5000:80" # On mappe le port 80 de Nginx sur le 5173 habituel
+    depends_on:
+      - backend
+    networks:
+      - gamely-network
+
+networks:
+  gamely-network:
+    driver: bridge
