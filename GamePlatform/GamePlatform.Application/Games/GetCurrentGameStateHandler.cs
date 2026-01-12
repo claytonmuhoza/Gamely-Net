@@ -2,12 +2,9 @@ using System.Text.Json;
 using GamePlatform.Application.Games.Morpion;
 using GamePlatform.Application.Lobbies;
 using GamePlatform.Domain;
-using GamePlatform.Domain.Games.Morpion;
 using GamePlatform.Contracts.Games.Morpion;
-
 using GamePlatform.Contracts.Games.Puissance4;
 using GamePlatform.Contracts.Games.SpeedTyping;
-
 using GamePlatform.Application.Games.Puissance4;
 using GamePlatform.Application.Games.SpeedTyping;
 
@@ -130,31 +127,7 @@ public sealed class GetCurrentGameStateHandler
         var snapshot = JsonSerializer.Deserialize<SpeedTypingSnapshot>(session.StateJson, JsonOpts)
             ?? throw new InvalidOperationException("Invalid speedtyping state");
 
-        var phase = session.Phase == GamePhase.Running ? "Running" : "Finished";
-
-        // Snapshot runners ont déjà pseudo, mais on sécurise si jamais vide
-        var runners = snapshot.Runners.Select(r =>
-        {
-            var pseudo = !string.IsNullOrWhiteSpace(r.Pseudo)
-                ? r.Pseudo
-                : lobby.Players.FirstOrDefault(p => p.ClientId == r.ClientId)?.Pseudo ?? "Joueur";
-
-            return new SpeedTypingRunnerDto(
-                ClientId: r.ClientId,
-                Pseudo: pseudo,
-                Progress: r.Progress,
-                FinishedAtUnixMs: r.FinishedAtUnixMs
-            );
-        }).ToList();
-
-        return new SpeedTypingStateDto(
-            LobbyId: lobby.Id,
-            Phase: phase,
-            TextId: snapshot.TextId,
-            Text: snapshot.Text,
-            StartedAtUnixMs: snapshot.StartedAtUnixMs,
-            EndedAtUnixMs: snapshot.EndedAtUnixMs,
-            Runners: runners
-        );
+        // Utiliser le mapper pour créer le DTO avec le classement
+        return SpeedTypingMapper.ToDto(lobby.Id, snapshot);
     }
 }

@@ -113,7 +113,13 @@
     "bestScores": "Meilleurs scores",
     "time": "Temps",
     "score": "Score",
-    "date": "Date"
+    "date": "Date",
+    "textToType": "Texte à taper :",
+    "startTyping": "Commencez à taper...",
+    "correct": "Correct",
+    "errors": "Erreurs",
+    "precision": "Précision",
+    "wpm": "WPM"
   },
   "scores": {
     "title": "Classements",

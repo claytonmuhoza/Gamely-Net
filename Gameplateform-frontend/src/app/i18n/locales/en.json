@@ -112,7 +112,22 @@
     "bestScores": "Best scores",
     "time": "Time",
     "score": "Score",
-    "date": "Date"
+    "date": "Date",
+    "game": {
+      "typeHere": "Type here",
+      "typeText": "Type the text here",
+      "typeTextFast": "Type the text as fast as possible",
+      "raceFinished": "Race finished",
+      "raceInProgress": "Race in progress",
+      "textToType": "Text to type:",
+      "startTyping": "Start typing...",
+      "time": "Time",
+      "correct": "Correct",
+      "errors": "Errors",
+      "precision": "Accuracy",
+      "finished":"✓ Finished",
+      "wpm": "WPM"
+    }
   },
   "scores": {
     "title": "Leaderboards",

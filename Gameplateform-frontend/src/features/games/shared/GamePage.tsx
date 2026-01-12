@@ -34,7 +34,6 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
 
     const [error, setError] = useState<string | null>(null)
 
-    // ⚠️ state est "object" (polymorphe)
     const { state, setState, rejected, setRejected } = useGameRealtime<any>(lobbyId)
 
     useEffect(() => {
@@ -75,7 +74,7 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
         )
     }
 
-    // ✅ Switch par "shape"
+    // Switch par "shape"
     if (isMorpionStateDto(state)) {
         return (
             <MorpionGamePanel
@@ -87,7 +86,7 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
                 onPlay={onPlayMorpion}
                 onBackLobby={() => nav(`/lobbies/${lobbyId}`)}
                 onHome={() => nav('/')}
-                onReplay= {() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
+                onReplay={() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
             />
         )
     }
@@ -113,17 +112,21 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
                 onDrop={onDrop}
                 onBackLobby={() => nav(`/lobbies/${lobbyId}`)}
                 onHome={() => nav('/')}
-                onReplay= {() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
+                onReplay={() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
             />
         )
     }
 
-
     if (isSpeedTypingStateDto(state)) {
-        async function onProgress(progress: number) {
-            setError(null)
-            setRejected(null)
-            await updateSpeedTypingProgress(lobbyId, { clientId, progress })
+        //  CORRECTION: typedText au lieu de progress
+        async function onProgress(typedText: string) {
+            try {
+                setError(null)
+                setRejected(null)
+                await updateSpeedTypingProgress(lobbyId, { clientId, typedText })
+            } catch (e) {
+                setError(getErrorMessage(e))
+            }
         }
 
         return (
@@ -136,10 +139,11 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
                 onProgress={onProgress}
                 onBackLobby={() => nav(`/lobbies/${lobbyId}`)}
                 onHome={() => nav('/')}
-                onReplay= {() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
+                onReplay={() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
             />
         )
     }
+
     return (
         <Card>
             <CardContent>

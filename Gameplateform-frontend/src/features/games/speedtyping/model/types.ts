@@ -1,8 +1,13 @@
 export type SpeedTypingRunnerDto = {
     clientId: string
     pseudo: string
-    progress: number
+    typedText: string
+    correctChars: number
+    errorCount: number
+    wpm: number
+    accuracy: number
     finishedAtUnixMs: number | null
+    rank: number | null
 }
 
 export type SpeedTypingStateDto = {
@@ -17,5 +22,5 @@ export type SpeedTypingStateDto = {
 
 export type UpdateSpeedTypingProgressRequest = {
     clientId: string
-    progress: number
+    typedText: string
 }

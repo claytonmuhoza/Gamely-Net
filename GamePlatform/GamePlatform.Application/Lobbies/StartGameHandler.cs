@@ -18,7 +18,13 @@ public sealed class StartGameHandler
     private readonly ISpeedTypingTextProvider _textProvider;
     private readonly IGameActionLogger _actionLogger;
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
-    public StartGameHandler(ILobbyRepository repo, IGameSessionRepository sessions, ILobbyNotifier notifier, ISpeedTypingTextProvider textProvider, GameActionLogger actionLogger)
+
+    public StartGameHandler(
+        ILobbyRepository repo,
+        IGameSessionRepository sessions,
+        ILobbyNotifier notifier,
+        ISpeedTypingTextProvider textProvider,
+        IGameActionLogger actionLogger)
     {
         _repo = repo;
         _sessions = sessions;
@@ -29,7 +35,8 @@ public sealed class StartGameHandler
 
     public async Task<GameSession> Handle(Guid lobbyId, StartGameRequest req, CancellationToken ct)
     {
-        var lobby = await _repo.GetByIdAsync(lobbyId, ct) ?? throw new KeyNotFoundException("Lobby not found");
+        var lobby = await _repo.GetByIdAsync(lobbyId, ct) 
+            ?? throw new KeyNotFoundException("Lobby not found");
 
         if (lobby.HostClientId != req.ClientId)
             throw new UnauthorizedAccessException("Only host can start");
@@ -58,20 +65,24 @@ public sealed class StartGameHandler
         await _sessions.SaveChangesAsync(ct);
         await _notifier.NotifyLobbyUpdated(lobby.Id, ct);
         await _notifier.NotifyLobbyListUpdated(ct);
+        
         await _actionLogger.LogAsync(
             session.Id,
             "START_GAME",
-            JsonSerializer.Serialize(new { lobbyId, gameId = session.GameId.ToString() }),
+            JsonSerializer.Serialize(new { lobbyId, gameId = session.GameId.ToString() }, JsonOpts),
             req.ClientId,
             ct);
+        
         await _actionLogger.LogAsync(
             session.Id,
             GameActionTypes.StateSnapshot,
-           initialState,
+            initialState,
             req.ClientId,
             ct);
+        
         return session;
     }
+
     private static string BuildInitialStateJson(Lobby lobby, ISpeedTypingTextProvider textProvider)
     {
         if (lobby.GameId == GameId.Morpion)
@@ -89,9 +100,9 @@ public sealed class StartGameHandler
                 IsDraw = false
             };
 
-            return JsonSerializer.Serialize(snapshot);
+            return JsonSerializer.Serialize(snapshot, JsonOpts);
         }
-        
+
         if (lobby.GameId == GameId.Puissance4)
         {
             var p0 = lobby.Players[0];
@@ -107,15 +118,17 @@ public sealed class StartGameHandler
                 IsDraw = false
             };
 
-            return JsonSerializer.Serialize(snapshot);
+            return JsonSerializer.Serialize(snapshot, JsonOpts);
         }
+
         if (lobby.GameId == GameId.SpeedTyping)
         {
-            // Texte
-            var (textId, text) = textProvider.GetRandomText(); // on va injecter _textProvider
+            // Récupérer un texte aléatoire
+            var (textId, text) = textProvider.GetRandomText();
 
             var startedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+            // IMPORTANT: Initialiser TOUS les champs requis
             var snapshot = new SpeedTypingSnapshot
             {
                 TextId = textId,
@@ -127,14 +140,20 @@ public sealed class StartGameHandler
                 {
                     ClientId = p.ClientId,
                     Pseudo = p.Pseudo,
-                    Progress = 0,
+                    // ✅ TOUS les nouveaux champs initialisés
+                    TypedText = "",
+                    CorrectChars = 0,
+                    ErrorCount = 0,
+                    WPM = 0.0,
+                    Accuracy = 100.0,
                     FinishedAtUnixMs = null,
                     LastUpdateUnixMs = startedAtMs
                 }).ToList()
             };
 
-            return JsonSerializer.Serialize(snapshot);
+            return JsonSerializer.Serialize(snapshot, JsonOpts);
         }
+
         return "{}";
     }
 }
