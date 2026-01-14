@@ -40,6 +40,8 @@ public sealed class LobbyRepository : ILobbyRepository
     public Task<List<Lobby>> GetAllAsync(CancellationToken ct)
         => _db.Lobbies
             .ToListAsync(ct);
+    public Task<List<Lobby>> GetAllInGameAsync(CancellationToken ct)
+    => _db.Lobbies.Where(l=>l.Status == LobbyStatus.InGame).ToListAsync(ct);
 
 
     

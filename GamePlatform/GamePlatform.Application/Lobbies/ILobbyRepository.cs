@@ -13,4 +13,7 @@ public interface ILobbyRepository
     Task RemoveAsync(Lobby lobby, CancellationToken ct);
     
     Task<List<Lobby>> GetAllAsync(CancellationToken ct);
+    Task<List<Lobby>> GetAllInGameAsync(CancellationToken ct);
+
+    
 }

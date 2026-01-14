@@ -21,15 +21,45 @@ public sealed class ScoreRepository : IScoreRepository
         ScoreOrdering ordering,
         CancellationToken ct)
     {
-        var q = _db.Scores
+        // Regroupement par ClientId avec somme des scores
+        var aggregatedScores = await _db.Scores
             .AsNoTracking()
-            .Where(s => s.GameId == gameId);
+            .Where(s => s.GameId == gameId)
+            .GroupBy(s => s.ClientId)
+            .Select(g => new
+            {
+                ClientId = g.Key,
+                TotalValue = g.Sum(s => s.Value),
+                Pseudo = g.OrderByDescending(s => s.AchievedAt).First().Pseudo,
+                LatestAchievedAt = g.Max(s => s.AchievedAt),
+                // Garder les autres propriétés du score le plus récent
+                GameId = gameId,
+                FirstScoreId = g.OrderByDescending(s => s.AchievedAt).First().Id,
+                LobbyId = g.OrderByDescending(s => s.AchievedAt).First().LobbyId,
+                GameSessionId = g.OrderByDescending(s => s.AchievedAt).First().GameSessionId
+            })
+            .ToListAsync(ct);
 
-        q = ordering == ScoreOrdering.LowerIsBetter
-            ? q.OrderBy(s => s.Value).ThenBy(s => s.AchievedAt)
-            : q.OrderByDescending(s => s.Value).ThenBy(s => s.AchievedAt);
+        // Tri selon l'ordering
+        var sorted = ordering == ScoreOrdering.LowerIsBetter
+            ? aggregatedScores.OrderBy(s => s.TotalValue).ThenBy(s => s.LatestAchievedAt)
+            : aggregatedScores.OrderByDescending(s => s.TotalValue).ThenBy(s => s.LatestAchievedAt);
 
-        return await q.Take(limit).ToListAsync(ct);
+        // Conversion en ScoreEntry et limitation
+        return sorted
+            .Take(limit)
+            .Select(s => new ScoreEntry
+            {
+                Id = s.FirstScoreId,
+                GameId = s.GameId,
+                LobbyId = s.LobbyId,
+                GameSessionId = s.GameSessionId,
+                ClientId = s.ClientId,
+                Pseudo = s.Pseudo,
+                Value = s.TotalValue, // ← La somme !
+                AchievedAt = s.LatestAchievedAt
+            })
+            .ToList();
     }
 
     public Task SaveChangesAsync(CancellationToken ct)
