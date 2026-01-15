@@ -48,8 +48,12 @@ function LobbyRoomPageInner({ lobbyId }: { lobbyId: string }) {
     const [error, setError] = useState<string | null>(null)
     const [password, setPassword] = useState('')
     const [copied, setCopied] = useState(false)
+    const [lobbyNotFound, setLobbyNotFound] = useState(false)
 
-    const { lobby, setLobby } = useLobbyRealtime(lobbyId)
+    const { lobby, setLobby } = useLobbyRealtime(lobbyId, () => {
+        // Callback appelé quand le lobby est supprimé via realtime
+        setLobbyNotFound(true)
+    })
 
     const isInLobby = useMemo(
         () => lobby?.players.some((p) => p.clientId === clientId) ?? false,
@@ -68,6 +72,7 @@ function LobbyRoomPageInner({ lobbyId }: { lobbyId: string }) {
             try {
                 setLoading(true)
                 setError(null)
+                setLobbyNotFound(false)
 
                 const details = await getLobbyDetails(lobbyId)
                 setLobby(details)
@@ -77,10 +82,18 @@ function LobbyRoomPageInner({ lobbyId }: { lobbyId: string }) {
 
                     if (!details.players.some((p) => p.clientId === clientId) && !details.isPrivate) {
                         await joinLobby(lobbyId, { clientId, pseudo, password: null })
+                        // Récupérer les détails mis à jour après avoir rejoint
+                        const updatedDetails = await getLobbyDetails(lobbyId)
+                        setLobby(updatedDetails)
                     }
                 }
-            } catch (e) {
-                setError(getErrorMessage(e))
+            } catch (e: any) {
+                // Vérifier si c'est une erreur 404 (lobby not found)
+                if (e?.response?.status === 404 || e?.status === 404) {
+                    setLobbyNotFound(true)
+                } else {
+                    setError(getErrorMessage(e))
+                }
             } finally {
                 setLoading(false)
             }
@@ -102,8 +115,13 @@ function LobbyRoomPageInner({ lobbyId }: { lobbyId: string }) {
                 pseudo,
                 password: lobby?.isPrivate ? password : null
             })
-        } catch (e) {
-            setError(getErrorMessage(e))
+        } catch (e: any) {
+            // Vérifier si c'est une erreur 401 (mauvais mot de passe)
+            if (e?.response?.status === 401 || e?.status === 401) {
+                setError(t('lobby.incorrectPassword'))
+            } else {
+                setError(getErrorMessage(e))
+            }
         }
     }
 
@@ -127,9 +145,16 @@ function LobbyRoomPageInner({ lobbyId }: { lobbyId: string }) {
     }
 
     function copyLobbyId() {
-        navigator.clipboard.writeText(lobbyId)
+        const fullUrl = `${window.location.origin}/lobbies/${lobbyId}`
+        navigator.clipboard.writeText(fullUrl)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
+    }
+
+    // Rediriger vers la page 404 si le lobby n'existe pas
+    if (lobbyNotFound) {
+        nav('/404', { replace: true })
+        return null
     }
 
     if (loading || !lobby) {

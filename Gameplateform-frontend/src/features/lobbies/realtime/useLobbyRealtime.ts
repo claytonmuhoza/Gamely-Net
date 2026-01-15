@@ -3,8 +3,9 @@ import { getLobbyConnection } from '../../../shared/realtime/connection'
 import type { LobbyDetailsDto } from '../model/types'
 
 const EVENT_LOBBY_UPDATED = 'LobbyUpdated'
+const EVENT_LOBBY_DELETED = 'LobbyDeleted'
 
-export function useLobbyRealtime(lobbyId: string) {
+export function useLobbyRealtime(lobbyId: string, onLobbyDeleted?: () => void) {
     const [lobby, setLobby] = useState<LobbyDetailsDto | null>(null)
 
     useEffect(() => {
@@ -13,16 +14,25 @@ export function useLobbyRealtime(lobbyId: string) {
         async function run() {
             const conn = await getLobbyConnection()
 
-            const handler = (payload: LobbyDetailsDto) => {
+            const updateHandler = (payload: LobbyDetailsDto) => {
                 if (!mounted) return
                 setLobby(payload)
             }
 
-            conn.on(EVENT_LOBBY_UPDATED, handler)
+            const deleteHandler = (deletedLobbyId: string) => {
+                if (!mounted) return
+                if (deletedLobbyId === lobbyId) {
+                    onLobbyDeleted?.()
+                }
+            }
+
+            conn.on(EVENT_LOBBY_UPDATED, updateHandler)
+            conn.on(EVENT_LOBBY_DELETED, deleteHandler)
             await conn.invoke('SubscribeLobby', lobbyId)
 
             return async () => {
-                conn.off(EVENT_LOBBY_UPDATED, handler)
+                conn.off(EVENT_LOBBY_UPDATED, updateHandler)
+                conn.off(EVENT_LOBBY_DELETED, deleteHandler)
                 try {
                     await conn.invoke('UnsubscribeLobby', lobbyId)
                 } catch {
@@ -38,7 +48,7 @@ export function useLobbyRealtime(lobbyId: string) {
             mounted = false
             if (cleanup) void cleanup()
         }
-    }, [lobbyId])
+    }, [lobbyId, onLobbyDeleted])
 
     return { lobby, setLobby }
 }

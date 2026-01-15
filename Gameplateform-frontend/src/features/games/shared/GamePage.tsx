@@ -137,7 +137,7 @@ function GamePageInner({ lobbyId }: { lobbyId: string }) {
                 rejected={rejected}
                 error={error}
                 onProgress={onProgress}
-                onBackLobby={() => nav(`/lobbies/${lobbyId}`)}
+                onBackLobby={() => nav(`/`)}
                 onHome={() => nav('/')}
                 onReplay={() => nav(`/admin/actions/${lobbyId}?tab=replay`)}
             />

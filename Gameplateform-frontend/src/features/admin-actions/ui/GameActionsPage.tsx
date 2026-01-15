@@ -22,7 +22,7 @@ import {
     Typography
 } from '@mui/material'
 import {useEffect, useMemo, useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom'
 import {ArrowBack, History, MovieFilter, Refresh, Search, SkipNext, SkipPrevious, Visibility} from '@mui/icons-material'
 import {useTranslation} from 'react-i18next'
 import {getErrorMessage } from '../../../shared/api/http'
@@ -76,8 +76,15 @@ function getSummary(actionType: string, payloadJson: string) {
 export function GameActionsPage() {
     const {t} = useTranslation()
     const nav = useNavigate()
+    const params = useParams()
+    const [searchParams] = useSearchParams()
 
-    const [tab, setTab] = useState<number>(1)
+    // Récupérer le lobbyId depuis l'URL si présent
+    const urlLobbyId = params.lobbyId
+    // Récupérer le tab depuis les query params (ex: ?tab=replay)
+    const urlTab = searchParams.get('tab')
+
+    const [tab, setTab] = useState<number>(urlTab === 'replay' ? 0 : 1)
     const [step, setStep] = useState<number>(0)
     const [filter, setFilter] = useState<string>('')
     const [lobbyFilter, setLobbyFilter] = useState<string>('')
@@ -88,21 +95,41 @@ export function GameActionsPage() {
     const [lobbiesError, setLobbiesError] = useState<string | null>(null)
 
     // États pour le lobby sélectionné
-    const [selectedLobbyId, setSelectedLobbyId] = useState<string | null>(null)
+    const [selectedLobbyId, setSelectedLobbyId] = useState<string | null>(urlLobbyId ?? null)
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
     const [items, setItems] = useState<GameActionLogDto[]>([])
 
     const snapshots = useMemo(() => extractStateSnapshots(items), [items])
 
-    useEffect(() => {
-        setStep(0)
+    // Calculer l'étape initiale : commence à 1 si disponible, sinon 0
+    const initialStep = useMemo(() => {
+        return snapshots.length > 1 ? 1 : 0
     }, [snapshots.length])
+
+    // Réinitialiser step à l'étape initiale quand les snapshots changent
+    useEffect(() => {
+        setStep(initialStep)
+    }, [initialStep])
 
     // Charger la liste des lobbies au montage
     useEffect(() => {
         void loadLobbies()
     }, [])
+
+    // Charger automatiquement les actions si lobbyId est dans l'URL
+    useEffect(() => {
+        if (urlLobbyId) {
+            void loadGameActions(urlLobbyId)
+        }
+    }, [urlLobbyId])
+
+    // Basculer automatiquement sur l'onglet replay si demandé
+    useEffect(() => {
+        if (urlTab === 'replay') {
+            setTab(0)
+        }
+    }, [urlTab])
 
     async function loadLobbies() {
         try {
@@ -146,7 +173,10 @@ export function GameActionsPage() {
             setError(null)
             const res = await getGameActions(id)
             setItems(res)
-            setTab(1)
+            // Ne change le tab que si on n'a pas de paramètre URL spécifique
+            if (!urlTab) {
+                setTab(1)
+            }
         } catch (e) {
             setError(getErrorMessage(e))
             setItems([])
@@ -164,67 +194,69 @@ export function GameActionsPage() {
         setSelectedLobbyId(null)
         setItems([])
         setError(null)
+        nav('/admin/actions')
     }
 
     function renderSnapshotPanel() {
-        if (snapshots.length === 0) {
-            return (
-                <Alert severity="info" sx={{borderRadius: 2}}>
-                    {t('admin.noSnapshots')}
-                </Alert>
-            )
+        if (snapshots.length === 0) return null
+        const current = snapshots[step]
+        if (!current) return null
+
+        const state = current.state
+
+        if (isMorpionStateDto(state)) {
+            return <MorpionViewPanel state={state} />
         }
 
-        const safeStep = Math.min(Math.max(step, 0), snapshots.length - 1)
-        const snap = snapshots[safeStep]
-        const subtitle = `${t('lobby.lobbyId')}: ${snap.state?.lobbyId ?? '?'} • ${new Date(snap.at).toLocaleString()}`
-
-        if (isMorpionStateDto(snap.state)) {
-            return <MorpionViewPanel state={snap.state} subtitle={subtitle} highlightClientId={snap.actorClientId}/>
-        }
-        if (isPuissance4StateDto(snap.state)) {
-            return <Puissance4ViewPanel state={snap.state} subtitle={subtitle} highlightClientId={snap.actorClientId}/>
-        }
-        if (isSpeedTypingStateDto(snap.state)) {
-            return <SpeedTypingViewPanel state={snap.state} subtitle={subtitle} highlightClientId={snap.actorClientId}/>
+        if (isPuissance4StateDto(state)) {
+            return <Puissance4ViewPanel state={state} />
         }
 
-        return <Alert severity="warning" sx={{borderRadius: 2}}>{t('admin.snapshotUnknown')}</Alert>
+        if (isSpeedTypingStateDto(state)) {
+            return <SpeedTypingViewPanel state={state} />
+        }
+
+        return (
+            <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                {t('admin.snapshotUnknown')}
+                <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>
+                    {JSON.stringify(state, null, 2)}
+                </pre>
+            </Alert>
+        )
     }
 
-    // Vue liste des lobbies
+    // Si aucun lobby sélectionné => afficher la liste des lobbies
     if (!selectedLobbyId) {
         return (
             <Stack spacing={3}>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                    <IconButton onClick={() => nav('/')} size="large">
-                        <ArrowBack/>
-                    </IconButton>
-                    <Box sx={{flexGrow: 1}}>
-                        <Typography variant="h4" sx={{fontWeight: 800, mb: 0.5}}>
-                            {t('admin.title')}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {t('admin.subtitle')}
-                        </Typography>
-                    </Box>
-                    <IconButton onClick={() => loadLobbies()} disabled={lobbiesLoading}>
-                        <Refresh/>
-                    </IconButton>
-                </Stack>
+                <Box>
+                    <Typography variant="h4" sx={{fontWeight: 800, mb: 1}}>
+                        {t('admin.gameActions')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        {t('admin.selectLobby')}
+                    </Typography>
+                </Box>
 
                 <Card sx={{borderRadius: 3}}>
                     <CardContent sx={{p: {xs: 2, sm: 3}}}>
                         <Stack spacing={3}>
-                            <TextField
-                                label={t('admin.searchLobby')}
-                                value={lobbyFilter}
-                                onChange={(e) => setLobbyFilter(e.target.value)}
-                                placeholder={t('admin.searchLobbyPlaceholder')}
-                                fullWidth
-                                InputProps={{startAdornment: <Search sx={{mr: 1, color: 'text.secondary'}}/>}}
-                                sx={{'& .MuiOutlinedInput-root': {borderRadius: 2}}}
-                            />
+                            <Stack direction="row" spacing={2} alignItems="center">
+                                <TextField
+                                    placeholder={t('admin.searchLobby')}
+                                    value={lobbyFilter}
+                                    onChange={(e) => setLobbyFilter(e.target.value)}
+                                    fullWidth
+                                    InputProps={{
+                                        startAdornment: <Search sx={{mr: 1, color: 'text.secondary'}}/>,
+                                    }}
+                                    sx={{'& .MuiOutlinedInput-root': {borderRadius: 2}}}
+                                />
+                                <IconButton onClick={loadLobbies} size="large">
+                                    <Refresh/>
+                                </IconButton>
+                            </Stack>
 
                             {lobbiesError && (
                                 <Alert severity="error" sx={{borderRadius: 2}}>
@@ -237,84 +269,52 @@ export function GameActionsPage() {
                                     <CircularProgress/>
                                 </Box>
                             ) : filteredLobbies.length === 0 ? (
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        py: 6,
-                                        px: 3,
-                                        textAlign: 'center',
-                                        bgcolor: 'grey.50',
-                                        borderRadius: 3,
-                                        border: '2px dashed',
-                                        borderColor: 'grey.300'
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            width: 80,
-                                            height: 80,
-                                            borderRadius: '50%',
-                                            bgcolor: 'grey.200',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            mb: 2
-                                        }}
-                                    >
-                                        <Search sx={{ fontSize: 40, color: 'grey.400' }} />
-                                    </Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
-                                        {t('admin.noLobbies')}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300 }}>
-                                        {t('admin.noLobbiesDescription')}
-                                    </Typography>
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={<Refresh />}
-                                        onClick={() => loadLobbies()}
-                                        sx={{ mt: 3, textTransform: 'none', borderRadius: 2 }}
-                                    >
-                                        {t('common.refresh')}
-                                    </Button>
-                                </Box>
+                                <Alert severity="info" sx={{borderRadius: 2}}>
+                                    {t('admin.noLobbies')}
+                                </Alert>
                             ) : (
                                 <TableContainer component={Paper} variant="outlined" sx={{borderRadius: 2}}>
-                                    <Table size="small">
+                                    <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell sx={{fontWeight: 700}}>{t('lobby.lobbyId')}</TableCell>
-                                                <TableCell sx={{fontWeight: 700}}>{t('lobby.status')}</TableCell>
-                                                <TableCell sx={{fontWeight: 700}}>{t('lobby.players')}</TableCell>
-                                                <TableCell sx={{fontWeight: 700}}>{t('common.actions')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.lobbyId')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('scores.game')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.host')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.status')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.players')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.createdAt')}</TableCell>
+                                                <TableCell sx={{fontWeight: 700}}>{t('admin.actions')}</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {filteredLobbies.map((lobby) => (
                                                 <TableRow key={lobby.lobbyId} hover>
-                                                    <TableCell sx={{fontFamily: 'monospace', fontSize: '0.75rem'}}>
-                                                        {lobby.lobbyId.slice(0, 8)}...
+                                                    <TableCell sx={{fontFamily: 'monospace', fontSize: '0.875rem'}}>
+                                                        {lobby.lobbyId.slice(0, 12)}...
                                                     </TableCell>
+                                                    <TableCell>
+                                                        <Chip size="small" label={lobby.gameId}/>
+                                                    </TableCell>
+                                                    <TableCell>{lobby.hostPseudo}</TableCell>
                                                     <TableCell>
                                                         <Chip
                                                             size="small"
                                                             label={lobby.status}
-                                                            color={lobby.status === 'Playing' ? 'success' : lobby.status === 'Waiting' ? 'warning' : 'default'}
+                                                            color={lobby.status === 'FINISHED' ? 'success' : lobby.status === 'PLAYING' ? 'primary' : 'default'}
                                                         />
                                                     </TableCell>
                                                     <TableCell>{lobby.playersCount}</TableCell>
+                                                    <TableCell sx={{whiteSpace: 'nowrap', fontSize: '0.875rem'}}>
+                                                        {new Date(lobby.createdAt).toLocaleString()}
+                                                    </TableCell>
                                                     <TableCell>
                                                         <Button
                                                             size="small"
-                                                            variant="outlined"
                                                             startIcon={<Visibility/>}
                                                             onClick={() => handleSelectLobby(lobby.lobbyId)}
                                                             sx={{textTransform: 'none'}}
                                                         >
-                                                            {t('common.view')}
+                                                            {t('admin.view')}
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -428,6 +428,18 @@ export function GameActionsPage() {
                                                     </Stack>
                                                 </Box>
                                                 {renderSnapshotPanel()}
+                                                {step === 0 && snapshots.length > 1 && (
+                                                    <Alert severity="info" sx={{borderRadius: 2}}>
+                                                        {t('admin.step0Warning')}
+                                                        <Button
+                                                            size="small"
+                                                            onClick={() => setStep(1)}
+                                                            sx={{ml: 1}}
+                                                        >
+                                                            {t('admin.goToStep1')}
+                                                        </Button>
+                                                    </Alert>
+                                                )}
                                             </>
                                         )}
                                     </Stack>

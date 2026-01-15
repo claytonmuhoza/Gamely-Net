@@ -57,6 +57,7 @@
     "passwordRequired": "Password required",
     "passwordLabel": "Password",
     "minPassword": "Min {{min}} characters",
+    "incorrectPassword": "Incorrect password",
     "lobbyIdCopied": "Copied!",
     "lobbyId": "Lobby ID",
     "joinGame": "Join game",
@@ -125,7 +126,7 @@
       "correct": "Correct",
       "errors": "Errors",
       "precision": "Accuracy",
-      "finished":"✓ Finished",
+      "finished": "✓ Finished",
       "wpm": "WPM"
     }
   },
@@ -150,13 +151,17 @@
   "admin": {
     "title": "History & Replay",
     "subtitle": "Game administration",
+    "gameActions": "Game Actions",
     "lobbyIdLabel": "Lobby ID",
+    "lobbyId": "Lobby ID",
     "load": "Load",
     "filterActions": "Filter actions",
     "filterPlaceholder": "Action type, actor, payload...",
     "replay": "Replay",
     "history": "History",
     "step": "Step {{current}} / {{total}}",
+    "step0Warning": "Step 0 represents the initial game state which may not always identify the game type.",
+    "goToStep1": "Go to step 1",
     "noSnapshots": "No STATE_SNAPSHOT recorded for this game.",
     "noActions": "No actions to display.",
     "loadFirst": "No snapshots available. Load a game first.",
@@ -168,14 +173,19 @@
     "actor": "Actor",
     "summary": "Summary",
     "payload": "Payload",
-    "searchLobby": "Search lobby by ID",
+    "searchLobby": "Search lobby...",
+    "selectLobby": "Select a lobby to view its actions",
     "invalidLobbyId": "Invalid Lobby ID",
     "searchLobbyPlaceholder": "Enter a valid Lobby ID",
     "noLobbies": "No lobbies found.",
     "noLobbiesDescription": "Try changing the Lobby ID or make sure a game has been played.",
-    "lobbyDetails": "Lobby Details"
-
-
+    "lobbyDetails": "Lobby Details",
+    "host": "Host",
+    "status": "Status",
+    "players": "Players",
+    "createdAt": "Created at",
+    "actions": "Actions",
+    "view": "View"
   },
   "welcome": {
     "title": "Welcome to GameHub",
